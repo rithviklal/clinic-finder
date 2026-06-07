@@ -92,7 +92,14 @@ function Admin() {
   const [metrics, setMetrics] = useState(null);
   const adminPass = import.meta.env.VITE_ADMIN_PASSCODE || 'admin';
   useEffect(() => { if (ok) loadMetrics(); }, [ok]);
-  function login(){ if(pass === adminPass){ sessionStorage.setItem('admin_ok','1'); setOk(true); }}
+  function login(){ 
+  if(pass.trim() === adminPass.trim()){ 
+    sessionStorage.setItem('admin_ok','1'); 
+    setOk(true); 
+  } else {
+    alert("Incorrect passcode. Please try again.");
+  }
+}
   async function loadMetrics(){
     const [{data:visitors},{data:views},{data:clicks},{data:clinics},{data:searches}] = await Promise.all([
       supabase.from('visitors').select('*'), supabase.from('page_views').select('*'), supabase.from('clinic_link_clicks').select('*, clinics(clinic_name, city)'), supabase.from('clinics').select('*'), supabase.from('search_events').select('*')
