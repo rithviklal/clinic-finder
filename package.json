@@ -1,0 +1,26 @@
+{
+  "name": "worldsavers-clinic-finder-cloudflare",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build",
+    "preview": "vite preview",
+    "cf:preview": "npm run build && wrangler pages dev dist",
+    "cf:deploy": "npm run build && wrangler pages deploy dist"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "latest",
+    "vite": "latest",
+    "typescript": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "@supabase/supabase-js": "latest",
+    "lucide-react": "latest",
+    "chart.js": "latest",
+    "react-chartjs-2": "latest"
+  },
+  "devDependencies": {
+    "wrangler": "latest"
+  }
+}
