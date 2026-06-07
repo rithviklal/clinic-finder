@@ -11,7 +11,7 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Tooltip, Le
 
 function Header({ setRoute }) {
   return <header className="header">
-    <div className="brand" onClick={() => setRoute('home')}><div className="logo"><HeartPulse size={24}/></div><span>The World Savers</span></div>
+    <div className="brand" onClick={() => setRoute('home')}><div className="logo"><HeartPulse size={24}/></div><span>Openvol</span></div>
     <nav><button onClick={() => setRoute('home')}>Clinics</button><button onClick={() => setRoute('admin')}>Admin</button></nav>
   </header>;
 }
@@ -22,11 +22,11 @@ function Hero() {
       <span className="eyebrow"><Globe2 size={16}/> Student-led healthcare volunteering guide</span>
       <h1>Find clinic volunteering opportunities across Greater Atlanta.</h1>
       <p>Search community clinics, free clinics, and outreach organizations that welcome students and volunteers interested in healthcare service.</p>
-      <div className="heroStats"><div><b>Atlanta</b><span>Metro area</span></div><div><b>Free</b><span>Student resource</span></div><div><b>Tracked</b><span>Anonymous metrics</span></div></div>
+      <div className="heroStats"><div><b>Atlanta</b><span>Metro area</span></div><div><b>Free</b><span>Student resource</span></div>
     </div>
     <div className="heroCard">
       <img src="https://images.unsplash.com/photo-1559757175-0eb30cd8c063?auto=format&fit=crop&w=1200&q=80" alt="Healthcare volunteers" />
-      <div className="floating"><ShieldCheck/> Privacy-first analytics</div>
+      --<div className="floating"><ShieldCheck/> Privacy-first analytics</div>
     </div>
   </section>;
 }
