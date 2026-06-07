@@ -123,7 +123,7 @@ function Admin() {
 function App(){
   const [route,setRoute] = useState(location.pathname.startsWith('/admin') ? 'admin' : 'home');
   useEffect(()=>{ history.replaceState(null,'', route==='admin'?'/admin':'/'); },[route]);
-  return <><Header setRoute={setRoute}/>{route==='admin'?<Admin/>:<Home/>}<footer>© {new Date().getFullYear()} The World Savers. Student-led public service project.</footer></>;
+  return <><Header setRoute={setRoute}/>{route==='admin'?<Admin/>:<Home/>}<footer>© {new Date().getFullYear()} Openvol. Student-led public service project.</footer></>;
 }
 
 createRoot(document.getElementById('root')).render(<App/>);
