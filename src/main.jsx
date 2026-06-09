@@ -366,15 +366,38 @@ function Home() {
         <p>{filteredClinics.length} matching clinics</p>
       </section>
 
-      {loading ? (
-        <p className="loading">Loading clinics...</p>
-      ) : (
-        <section className="grid">
-          {filteredClinics.map((clinic) => (
-            <ClinicCard key={clinic.id} clinic={clinic} />
-          ))}
-        </section>
-      )}
+{loading ? (
+  <p className="loading">Loading clinics...</p>
+) : filteredClinics.length === 0 ? (
+  <div className="noResults">
+    <h3>No Matching Clinics Found</h3>
+
+    <p>
+      Try changing your search criteria, selecting a different county,
+      removing age restrictions, or searching nearby cities.
+    </p>
+
+    <button
+      className="primary"
+      onClick={() =>
+        setFilters({
+          searchText: '',
+          city: '',
+          county: '',
+          minimumAge: '',
+        })
+      }
+    >
+      Clear Filters
+    </button>
+  </div>
+) : (
+  <section className="grid">
+    {filteredClinics.map((clinic) => (
+      <ClinicCard key={clinic.id} clinic={clinic} />
+    ))}
+  </section>
+)}
 
       <div className="disclaimer">
         Volunteer requirements may change. Please verify age requirements, application procedures,
