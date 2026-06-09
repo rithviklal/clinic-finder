@@ -8,6 +8,8 @@ import {
   BarChart3,
   Globe2,
   Lock,
+  Bookmark,
+  ClipboardList,
 } from 'lucide-react';
 
 import { Bar, Doughnut } from 'react-chartjs-2';
@@ -36,6 +38,8 @@ function Header({ setRoute }) {
 
       <nav>
         <button onClick={() => setRoute('home')}>Clinics</button>
+        <button onClick={() => setRoute('opportunities')}>Shadowing & Research</button>
+        <button onClick={() => setRoute('tracker')}>My Tracker</button>
       </nav>
     </header>
   );
@@ -53,8 +57,8 @@ function Hero() {
         <h1>Find clinic volunteering opportunities across Greater Atlanta.</h1>
 
         <p>
-          Search community clinics, free clinics, and outreach organizations that welcome
-          students and volunteers interested in healthcare service.
+          Search community clinics, free clinics, shadowing pathways, research programs,
+          and outreach organizations that welcome students interested in healthcare service.
         </p>
 
         <div className="heroStats">
@@ -108,9 +112,7 @@ function ProjectInfoCard() {
 
         <div>
           <strong>Purpose:</strong>
-          <span>
-            Connecting students with healthcare volunteering opportunities across Georgia.
-          </span>
+          <span>Connecting students with healthcare volunteering opportunities across Georgia.</span>
         </div>
 
         <div>
@@ -122,7 +124,44 @@ function ProjectInfoCard() {
   );
 }
 
-function ClinicCard({ clinic }) {
+async function getOrCreateStudent(email) {
+  const cleanEmail = email.trim().toLowerCase();
+
+  if (!cleanEmail) {
+    alert('Please enter your email first.');
+    return null;
+  }
+
+  let { data: existing } = await supabase
+    .from('student_profiles')
+    .select('*')
+    .eq('email', cleanEmail)
+    .maybeSingle();
+
+  if (existing) {
+    return existing;
+  }
+
+  const { data, error } = await supabase
+    .from('student_profiles')
+    .insert({
+      email: cleanEmail,
+      full_name: null,
+      school_name: null,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.error(error);
+    alert('Unable to create student profile.');
+    return null;
+  }
+
+  return data;
+}
+
+function ClinicCard({ clinic, studentEmail }) {
   const mapUrl =
     clinic.latitude && clinic.longitude
       ? `https://www.openstreetmap.org/?mlat=${clinic.latitude}&mlon=${clinic.longitude}#map=14/${clinic.latitude}/${clinic.longitude}`
@@ -133,6 +172,29 @@ function ClinicCard({ clinic }) {
   const handleClick = async (url) => {
     await trackClinicClick(clinic.id, url);
     window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  const saveClinic = async () => {
+    const student = await getOrCreateStudent(studentEmail);
+    if (!student) return;
+
+    const { error } = await supabase.from('saved_clinics').insert({
+      student_id: student.id,
+      clinic_id: clinic.id,
+      application_status: 'Interested',
+    });
+
+    if (error) {
+      if (error.message?.toLowerCase().includes('duplicate')) {
+        alert('This clinic is already saved.');
+      } else {
+        console.error(error);
+        alert('Unable to save clinic.');
+      }
+      return;
+    }
+
+    alert('Clinic saved to My Tracker.');
   };
 
   return (
@@ -184,9 +246,7 @@ function ClinicCard({ clinic }) {
         <div className="tags">
           {clinic.volunteer_type ? (
             clinic.volunteer_type.split(',').map((tag) => (
-              <span key={tag.trim()}>
-                {tag.trim()}
-              </span>
+              <span key={tag.trim()}>{tag.trim()}</span>
             ))
           ) : (
             <span>Volunteer Opportunity</span>
@@ -198,6 +258,11 @@ function ClinicCard({ clinic }) {
         </div>
 
         <div className="actions">
+          <button onClick={saveClinic}>
+            <Bookmark size={15} />
+            Save
+          </button>
+
           {clinic.volunteer_url && (
             <button className="primary" onClick={() => handleClick(clinic.volunteer_url)}>
               Volunteer Link <ExternalLink size={15} />
@@ -208,16 +273,128 @@ function ClinicCard({ clinic }) {
             <button onClick={() => handleClick(clinic.website_url)}>Website</button>
           )}
 
-          <button onClick={() => window.open(mapUrl, '_blank', 'noopener,noreferrer')}>
-            Map
-          </button>
+          <button onClick={() => window.open(mapUrl, '_blank', 'noopener,noreferrer')}>Map</button>
         </div>
       </div>
     </article>
   );
 }
 
-function Home() {
+function OpportunityCard({ opportunity, studentEmail }) {
+  const saveOpportunity = async () => {
+    const student = await getOrCreateStudent(studentEmail);
+    if (!student) return;
+
+    const { error } = await supabase.from('saved_opportunities').insert({
+      student_id: student.id,
+      opportunity_id: opportunity.id,
+      application_status: 'Interested',
+    });
+
+    if (error) {
+      if (error.message?.toLowerCase().includes('duplicate')) {
+        alert('This opportunity is already saved.');
+      } else {
+        console.error(error);
+        alert('Unable to save opportunity.');
+      }
+      return;
+    }
+
+    alert('Opportunity saved to My Tracker.');
+  };
+
+  return (
+    <article className="clinicCard">
+      <div className="clinicLogoBox">
+        <div className="clinicInitials">
+          {opportunity.organization_name
+            .split(' ')
+            .filter(Boolean)
+            .slice(0, 3)
+            .map((word) => word[0])
+            .join('')
+            .toUpperCase()}
+        </div>
+      </div>
+
+      <div className="cardBody">
+        <div className="cardTop">
+          <h3>{opportunity.opportunity_name}</h3>
+          <span className="ageBadge">
+            {opportunity.minimum_age ? `${opportunity.minimum_age}+` : 'Ask'}
+          </span>
+        </div>
+
+        <div className="tags">
+          <span>{opportunity.opportunity_category || 'Opportunity'}</span>
+        </div>
+
+        <p className="location">
+          <MapPin size={16} />
+          {opportunity.city}, {opportunity.county} County
+        </p>
+
+        <p>
+          <b>Organization:</b> {opportunity.organization_name}
+        </p>
+
+        {opportunity.eligibility && (
+          <div className="requirements">
+            <b>Eligibility:</b> {opportunity.eligibility}
+          </div>
+        )}
+
+        {opportunity.requirements && (
+          <div className="requirements">
+            <b>Requirements:</b> {opportunity.requirements}
+          </div>
+        )}
+
+        <p>{opportunity.notes}</p>
+
+        <div className="actions">
+          <button onClick={saveOpportunity}>
+            <Bookmark size={15} />
+            Save
+          </button>
+
+          {opportunity.application_url && (
+            <button
+              className="primary"
+              onClick={() => window.open(opportunity.application_url, '_blank', 'noopener,noreferrer')}
+            >
+              Apply / Learn More <ExternalLink size={15} />
+            </button>
+          )}
+
+          {opportunity.website_url && (
+            <button onClick={() => window.open(opportunity.website_url, '_blank', 'noopener,noreferrer')}>
+              Website
+            </button>
+          )}
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function StudentEmailBox({ studentEmail, setStudentEmail }) {
+  return (
+    <section className="missionBanner">
+      <b>Save opportunities to your tracker:</b>{' '}
+      <input
+        style={{ maxWidth: '320px', marginLeft: '10px' }}
+        type="email"
+        placeholder="Enter your email"
+        value={studentEmail}
+        onChange={(event) => setStudentEmail(event.target.value)}
+      />
+    </section>
+  );
+}
+
+function Home({ studentEmail, setStudentEmail }) {
   const [clinics, setClinics] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
@@ -297,6 +474,8 @@ function Home() {
     <main>
       <Hero />
 
+      <StudentEmailBox studentEmail={studentEmail} setStudentEmail={setStudentEmail} />
+
       <section className="searchPanel">
         <div className="searchBox">
           <Search size={20} />
@@ -366,38 +545,26 @@ function Home() {
         <p>{filteredClinics.length} matching clinics</p>
       </section>
 
-{loading ? (
-  <p className="loading">Loading clinics...</p>
-) : filteredClinics.length === 0 ? (
-  <div className="noResults">
-    <h3>No Matching Clinics Found</h3>
-
-    <p>
-      Try changing your search criteria, selecting a different county,
-      removing age restrictions, or searching nearby cities.
-    </p>
-
-    <button
-      className="primary"
-      onClick={() =>
-        setFilters({
-          searchText: '',
-          city: '',
-          county: '',
-          minimumAge: '',
-        })
-      }
-    >
-      Clear Filters
-    </button>
-  </div>
-) : (
-  <section className="grid">
-    {filteredClinics.map((clinic) => (
-      <ClinicCard key={clinic.id} clinic={clinic} />
-    ))}
-  </section>
-)}
+      {loading ? (
+        <p className="loading">Loading clinics...</p>
+      ) : filteredClinics.length === 0 ? (
+        <div className="noResults">
+          <h3>No Matching Clinics Found</h3>
+          <p>Try changing your search criteria, county, city, or age filter.</p>
+          <button
+            className="primary"
+            onClick={() => setFilters({ searchText: '', city: '', county: '', minimumAge: '' })}
+          >
+            Clear Filters
+          </button>
+        </div>
+      ) : (
+        <section className="grid">
+          {filteredClinics.map((clinic) => (
+            <ClinicCard key={clinic.id} clinic={clinic} studentEmail={studentEmail} />
+          ))}
+        </section>
+      )}
 
       <div className="disclaimer">
         Volunteer requirements may change. Please verify age requirements, application procedures,
@@ -423,6 +590,299 @@ function Home() {
           </p>
         </div>
       </section>
+    </main>
+  );
+}
+
+function Opportunities({ studentEmail, setStudentEmail }) {
+  const [opportunities, setOpportunities] = useState([]);
+  const [filters, setFilters] = useState({
+    searchText: '',
+    category: '',
+    county: '',
+  });
+
+  useEffect(() => {
+    trackPageView('/opportunities');
+    loadOpportunities();
+  }, []);
+
+  async function loadOpportunities() {
+    const { data, error } = await supabase
+      .from('opportunities')
+      .select('*')
+      .eq('active_status', true)
+      .order('organization_name');
+
+    if (error) {
+      console.error(error);
+    }
+
+    setOpportunities(data || []);
+  }
+
+  const categories = [
+    ...new Set(opportunities.map((item) => item.opportunity_category).filter(Boolean)),
+  ];
+
+  const counties = [...new Set(opportunities.map((item) => item.county).filter(Boolean))];
+
+  const filtered = opportunities.filter((item) => {
+    const searchText = filters.searchText.toLowerCase();
+
+    const searchableText = [
+      item.organization_name,
+      item.opportunity_name,
+      item.opportunity_category,
+      item.city,
+      item.county,
+      item.notes,
+      item.eligibility,
+    ]
+      .join(' ')
+      .toLowerCase();
+
+    return (
+      (!searchText || searchableText.includes(searchText)) &&
+      (!filters.category || item.opportunity_category === filters.category) &&
+      (!filters.county || item.county === filters.county)
+    );
+  });
+
+  return (
+    <main>
+      <section className="sectionTitle">
+        <h1>Shadowing & Research</h1>
+        <p>{filtered.length} matching opportunities</p>
+      </section>
+
+      <StudentEmailBox studentEmail={studentEmail} setStudentEmail={setStudentEmail} />
+
+      <section className="searchPanel">
+        <div className="searchBox">
+          <Search size={20} />
+          <input
+            placeholder="Search shadowing, research, hospital, or organization"
+            value={filters.searchText}
+            onChange={(event) =>
+              setFilters((current) => ({ ...current, searchText: event.target.value }))
+            }
+          />
+        </div>
+
+        <select
+          value={filters.category}
+          onChange={(event) =>
+            setFilters((current) => ({ ...current, category: event.target.value }))
+          }
+        >
+          <option value="">All categories</option>
+          {categories.map((category) => (
+            <option key={category}>{category}</option>
+          ))}
+        </select>
+
+        <select
+          value={filters.county}
+          onChange={(event) =>
+            setFilters((current) => ({ ...current, county: event.target.value }))
+          }
+        >
+          <option value="">All counties</option>
+          {counties.map((county) => (
+            <option key={county}>{county}</option>
+          ))}
+        </select>
+      </section>
+
+      {filtered.length === 0 ? (
+        <div className="noResults">
+          <h3>No Matching Opportunities Found</h3>
+          <p>Try clearing your filters or searching a different category.</p>
+        </div>
+      ) : (
+        <section className="grid">
+          {filtered.map((opportunity) => (
+            <OpportunityCard
+              key={opportunity.id}
+              opportunity={opportunity}
+              studentEmail={studentEmail}
+            />
+          ))}
+        </section>
+      )}
+    </main>
+  );
+}
+
+function Tracker({ studentEmail, setStudentEmail }) {
+  const [savedClinics, setSavedClinics] = useState([]);
+  const [savedOpportunities, setSavedOpportunities] = useState([]);
+
+  useEffect(() => {
+    if (studentEmail) {
+      loadTracker();
+    }
+  }, [studentEmail]);
+
+  async function loadTracker() {
+    const student = await getOrCreateStudent(studentEmail);
+    if (!student) return;
+
+    const { data: clinics } = await supabase
+      .from('saved_clinics')
+      .select('*, clinics(*)')
+      .eq('student_id', student.id)
+      .order('saved_at', { ascending: false });
+
+    const { data: opportunities } = await supabase
+      .from('saved_opportunities')
+      .select('*, opportunities(*)')
+      .eq('student_id', student.id)
+      .order('saved_at', { ascending: false });
+
+    setSavedClinics(clinics || []);
+    setSavedOpportunities(opportunities || []);
+  }
+
+  async function updateClinicStatus(savedId, status) {
+    await supabase.from('saved_clinics').update({ application_status: status }).eq('id', savedId);
+    loadTracker();
+  }
+
+  async function updateOpportunityStatus(savedId, status) {
+    await supabase
+      .from('saved_opportunities')
+      .update({ application_status: status })
+      .eq('id', savedId);
+    loadTracker();
+  }
+
+  const statuses = [
+    'Interested',
+    'Applied',
+    'Interview Scheduled',
+    'Accepted',
+    'Waitlisted',
+    'Not Eligible',
+    'Closed',
+  ];
+
+  return (
+    <main>
+      <section className="sectionTitle">
+        <h1>My Tracker</h1>
+        <p>Saved clinics and opportunities</p>
+      </section>
+
+      <StudentEmailBox studentEmail={studentEmail} setStudentEmail={setStudentEmail} />
+
+      {!studentEmail ? (
+        <div className="noResults">
+          <h3>Enter your email to view your tracker</h3>
+          <p>Your saved clinics and opportunities will appear here.</p>
+        </div>
+      ) : (
+        <>
+          <section className="tableCard">
+            <h3>Saved Clinics</h3>
+
+            <table>
+              <thead>
+                <tr>
+                  <th>Clinic</th>
+                  <th>City</th>
+                  <th>Status</th>
+                  <th>Volunteer Link</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {savedClinics.map((item) => (
+                  <tr key={item.id}>
+                    <td>{item.clinics?.clinic_name}</td>
+                    <td>{item.clinics?.city}</td>
+                    <td>
+                      <select
+                        value={item.application_status}
+                        onChange={(event) => updateClinicStatus(item.id, event.target.value)}
+                      >
+                        {statuses.map((status) => (
+                          <option key={status}>{status}</option>
+                        ))}
+                      </select>
+                    </td>
+                    <td>
+                      {item.clinics?.volunteer_url && (
+                        <button
+                          onClick={() =>
+                            window.open(item.clinics.volunteer_url, '_blank', 'noopener,noreferrer')
+                          }
+                        >
+                          Open
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </section>
+
+          <section className="tableCard">
+            <h3>Saved Shadowing & Research Opportunities</h3>
+
+            <table>
+              <thead>
+                <tr>
+                  <th>Opportunity</th>
+                  <th>Organization</th>
+                  <th>Category</th>
+                  <th>Status</th>
+                  <th>Link</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {savedOpportunities.map((item) => (
+                  <tr key={item.id}>
+                    <td>{item.opportunities?.opportunity_name}</td>
+                    <td>{item.opportunities?.organization_name}</td>
+                    <td>{item.opportunities?.opportunity_category}</td>
+                    <td>
+                      <select
+                        value={item.application_status}
+                        onChange={(event) =>
+                          updateOpportunityStatus(item.id, event.target.value)
+                        }
+                      >
+                        {statuses.map((status) => (
+                          <option key={status}>{status}</option>
+                        ))}
+                      </select>
+                    </td>
+                    <td>
+                      {item.opportunities?.application_url && (
+                        <button
+                          onClick={() =>
+                            window.open(
+                              item.opportunities.application_url,
+                              '_blank',
+                              'noopener,noreferrer'
+                            )
+                          }
+                        >
+                          Open
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </section>
+        </>
+      )}
     </main>
   );
 }
@@ -615,15 +1075,31 @@ function App() {
     location.pathname.startsWith('/admin') ? 'admin' : 'home'
   );
 
+  const [studentEmail, setStudentEmail] = useState(
+    localStorage.getItem('openvol_student_email') || ''
+  );
+
   useEffect(() => {
-    history.replaceState(null, '', route === 'admin' ? '/admin' : '/');
+    localStorage.setItem('openvol_student_email', studentEmail);
+  }, [studentEmail]);
+
+  useEffect(() => {
+    history.replaceState(null, '', route === 'home' ? '/' : `/${route}`);
   }, [route]);
 
   return (
     <>
       <Header setRoute={setRoute} />
 
-      {route === 'admin' ? <Admin /> : <Home />}
+      {route === 'admin' ? (
+        <Admin />
+      ) : route === 'opportunities' ? (
+        <Opportunities studentEmail={studentEmail} setStudentEmail={setStudentEmail} />
+      ) : route === 'tracker' ? (
+        <Tracker studentEmail={studentEmail} setStudentEmail={setStudentEmail} />
+      ) : (
+        <Home studentEmail={studentEmail} setStudentEmail={setStudentEmail} />
+      )}
 
       <footer>
         <div>© {new Date().getFullYear()} Openvol</div>
