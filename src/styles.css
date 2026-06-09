@@ -1,1 +1,156 @@
 :root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;color:#122033;background:#f7fbff}*{box-sizing:border-box}body{margin:0}.header{position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center;padding:18px 7%;background:rgba(255,255,255,.88);backdrop-filter:blur(14px);border-bottom:1px solid #e7eef7}.brand{display:flex;align-items:center;gap:12px;font-weight:800;font-size:20px;cursor:pointer}.logo{width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,#0ea5e9,#14b8a6);display:grid;place-items:center;color:white}nav{display:flex;gap:10px}button{border:0;background:#edf5ff;padding:11px 16px;border-radius:999px;cursor:pointer;font-weight:700;color:#14324a}button:hover{transform:translateY(-1px)}.primary{background:linear-gradient(135deg,#0ea5e9,#14b8a6);color:white;display:inline-flex;align-items:center;gap:8px}.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:44px;padding:72px 7% 44px;align-items:center;background:radial-gradient(circle at 10% 10%,#dff7ff,transparent 30%),linear-gradient(180deg,#ffffff,#f4fbff)}.eyebrow{display:inline-flex;align-items:center;gap:8px;background:#e7fbf8;color:#0f766e;padding:9px 14px;border-radius:999px;font-weight:800}.hero h1{font-size:clamp(40px,6vw,72px);line-height:.95;margin:20px 0;color:#0f2337;letter-spacing:-2px}.hero p{font-size:19px;line-height:1.65;color:#536579;max-width:640px}.heroStats{display:flex;gap:14px;flex-wrap:wrap;margin-top:28px}.heroStats div{background:white;border:1px solid #e1edf8;border-radius:22px;padding:18px 24px;box-shadow:0 10px 30px rgba(15,35,55,.06)}.heroStats b{display:block;font-size:24px}.heroStats span{color:#65758b}.heroCard{position:relative}.heroCard img{width:100%;height:520px;object-fit:cover;border-radius:36px;box-shadow:0 25px 80px rgba(15,35,55,.18)}.floating{position:absolute;bottom:22px;left:22px;background:white;padding:16px 18px;border-radius:18px;display:flex;gap:10px;align-items:center;font-weight:800;box-shadow:0 18px 50px rgba(0,0,0,.16)}.searchPanel{margin:12px 7% 34px;background:white;border:1px solid #e3edf8;border-radius:28px;padding:18px;display:grid;grid-template-columns:2fr 1fr 1fr .8fr;gap:12px;box-shadow:0 15px 50px rgba(15,35,55,.07)}input,select{width:100%;border:1px solid #dbe7f3;background:#f8fbff;border-radius:16px;padding:14px 15px;font-size:15px}.searchBox{display:flex;align-items:center;gap:10px;background:#f8fbff;border:1px solid #dbe7f3;border-radius:16px;padding-left:14px}.searchBox input{border:0;background:transparent;outline:0}.sectionTitle{padding:6px 7%;display:flex;justify-content:space-between;align-items:end}.sectionTitle h2,.sectionTitle h1{font-size:34px;margin:0;color:#122033}.sectionTitle p{color:#65758b}.grid{padding:20px 7% 60px;display:grid;grid-template-columns:repeat(3,1fr);gap:26px}.clinicCard{background:white;border:1px solid #e5eef8;border-radius:28px;overflow:hidden;box-shadow:0 18px 50px rgba(15,35,55,.08)}.clinicCard img{width:100%;height:210px;object-fit:cover}.cardBody{padding:22px}.cardTop{display:flex;justify-content:space-between;gap:15px}.cardTop h3{font-size:22px;margin:0 0 8px}.cardTop span{background:#ecfeff;color:#0e7490;padding:7px 11px;border-radius:999px;font-weight:900;height:max-content}.location{display:flex;align-items:center;gap:8px;color:#64748b}.tags span{display:inline-block;background:#f1f5f9;color:#334155;padding:8px 10px;border-radius:12px;font-size:13px;margin:8px 0}.requirements{background:#f8fbff;border-radius:16px;padding:13px;margin:10px 0;color:#475569}.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:15px}.impact{padding:10px 7% 80px;display:grid;grid-template-columns:1fr 1fr;gap:22px}.impact>div,.chartCard,.tableCard,.adminLogin>div{background:white;border:1px solid #e5eef8;border-radius:28px;padding:28px;box-shadow:0 15px 50px rgba(15,35,55,.07)}.impact svg{color:#0ea5e9}.admin{padding-bottom:70px}.adminLogin{min-height:70vh;display:grid;place-items:center;padding:7%}.adminLogin>div{max-width:460px;text-align:center}.adminLogin svg{color:#0ea5e9}.adminLogin h1{font-size:40px}.adminLogin input{margin:16px 0}.metricGrid{padding:20px 7%;display:grid;grid-template-columns:repeat(4,1fr);gap:18px}.metricGrid div{background:linear-gradient(135deg,#0f2337,#164e63);color:white;border-radius:24px;padding:28px}.metricGrid b{display:block;font-size:38px}.metricGrid span{opacity:.8}.charts{padding:10px 7%;display:grid;grid-template-columns:1.3fr .7fr;gap:22px}.tableCard{margin:22px 7%;overflow:auto}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px;border-bottom:1px solid #e5eef8}th{color:#64748b}.loading{padding:40px 7%;font-weight:800}footer{text-align:center;padding:34px;color:#64748b;background:#eef7ff}@media(max-width:1000px){.hero,.grid,.impact,.charts{grid-template-columns:1fr}.searchPanel,.metricGrid{grid-template-columns:1fr 1fr}.heroCard img{height:380px}}@media(max-width:640px){.header{padding:14px 5%}.brand span{font-size:16px}.hero{padding:42px 5%}.searchPanel,.grid,.impact,.metricGrid,.charts{margin-left:5%;margin-right:5%;padding-left:0;padding-right:0;grid-template-columns:1fr}.sectionTitle{padding:5%}.hero h1{font-size:42px}.heroStats{display:grid}.actions button{width:100%;justify-content:center}}
+/* ==========================================================
+   OPENVOL CLINIC LOGO / NAME CARDS
+   ========================================================== */
+
+.clinicLogoBox {
+  height: 210px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+
+  background: linear-gradient(
+    135deg,
+    #eefdf8 0%,
+    #f8fbff 100%
+  );
+
+  border-bottom: 1px solid #e5edf5;
+  padding: 20px;
+}
+
+.clinicLogoBox img {
+  width: 90px;
+  height: 90px;
+  object-fit: contain;
+
+  background: white;
+  border-radius: 18px;
+  padding: 12px;
+
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+}
+
+.clinicLogoName {
+  max-width: 240px;
+  text-align: center;
+
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+
+  color: #122033;
+}
+
+.clinicInitials {
+  width: 90px;
+  height: 90px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 22px;
+
+  background: linear-gradient(
+    135deg,
+    #0ea5e9,
+    #14b8a6
+  );
+
+  color: white;
+  font-size: 28px;
+  font-weight: 800;
+
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.15);
+}
+
+/* ==========================================================
+   OPTIONAL IMPROVEMENTS
+   ========================================================== */
+
+.clinicCard {
+  transition: all 0.25s ease;
+}
+
+.clinicCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 24px 60px rgba(15, 35, 55, 0.12);
+}
+
+.actions button {
+  transition: all 0.2s ease;
+}
+
+.actions button:hover {
+  transform: translateY(-2px);
+}
+
+.tags span {
+  background: #ecfeff;
+  color: #0e7490;
+  font-weight: 600;
+}
+
+.cardTop h3 {
+  color: #0f2337;
+}
+
+.location {
+  margin: 12px 0;
+}
+
+.requirements {
+  line-height: 1.5;
+}
+
+.heroCard img {
+  object-position: center;
+}
+
+.metricGrid div {
+  transition: all 0.25s ease;
+}
+
+.metricGrid div:hover {
+  transform: translateY(-3px);
+}
+
+.chartCard,
+.tableCard,
+.impact > div {
+  transition: all 0.25s ease;
+}
+
+.chartCard:hover,
+.tableCard:hover,
+.impact > div:hover {
+  box-shadow: 0 22px 60px rgba(15, 35, 55, 0.12);
+}
+
+/* ==========================================================
+   MOBILE IMPROVEMENTS
+   ========================================================== */
+
+@media (max-width: 768px) {
+  .clinicLogoBox {
+    height: 180px;
+  }
+
+  .clinicInitials {
+    width: 70px;
+    height: 70px;
+    font-size: 22px;
+  }
+
+  .clinicLogoBox img {
+    width: 70px;
+    height: 70px;
+  }
+
+  .clinicLogoName {
+    font-size: 13px;
+  }
+}
