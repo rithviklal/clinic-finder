@@ -59,7 +59,20 @@ function ClinicCard({ clinic }) {
   const mapUrl = clinic.latitude && clinic.longitude ? `https://www.openstreetmap.org/?mlat=${clinic.latitude}&mlon=${clinic.longitude}#map=14/${clinic.latitude}/${clinic.longitude}` : `https://www.openstreetmap.org/search?query=${encodeURIComponent(clinic.address || clinic.clinic_name)}`;
   const click = async (url) => { await trackClinicClick(clinic.id, url); window.open(url, '_blank', 'noopener,noreferrer'); };
   return <article className="clinicCard">
-    <img src={clinic.image_url || 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=1200&q=80'} alt={clinic.clinic_name}/>
+    <div className="clinicLogoBox">
+  {clinic.image_url ? (
+    <img src={clinic.image_url} alt={`${clinic.clinic_name} logo`} />
+  ) : (
+    <div className="clinicInitials">
+      {clinic.clinic_name
+        .split(' ')
+        .slice(0, 3)
+        .map((word) => word[0])
+        .join('')
+        .toUpperCase()}
+    </div>
+  )}
+</div>
     <div className="cardBody">
       <div className="cardTop"><h3>{clinic.clinic_name}</h3><span>{clinic.minimum_age ? `${clinic.minimum_age}+` : 'Ask'}</span></div>
       <p className="location"><MapPin size={16}/>{clinic.city}, {clinic.county} County</p>
