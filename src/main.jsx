@@ -4,7 +4,6 @@ import {
   Search,
   MapPin,
   ExternalLink,
-  HeartPulse,
   Users,
   BarChart3,
   Globe2,
@@ -76,6 +75,48 @@ function Hero() {
           src="https://images.unsplash.com/photo-1526256262350-7da7584cf5eb?auto=format&fit=crop&w=1200&q=80"
           alt="Healthcare volunteers"
         />
+      </div>
+    </section>
+  );
+}
+
+function ProjectInfoCard() {
+  return (
+    <section className="projectInfoCard">
+      <h3>Project Information</h3>
+
+      <div className="projectInfoGrid">
+        <div>
+          <strong>Project:</strong>
+          <span>Openvol</span>
+        </div>
+
+        <div>
+          <strong>Created By:</strong>
+          <span>Rithvik Lal</span>
+        </div>
+
+        <div>
+          <strong>School:</strong>
+          <span>Lassiter High School</span>
+        </div>
+
+        <div>
+          <strong>Role:</strong>
+          <span>Founder & Student Researcher</span>
+        </div>
+
+        <div>
+          <strong>Purpose:</strong>
+          <span>
+            Connecting students with healthcare volunteering opportunities across Georgia.
+          </span>
+        </div>
+
+        <div>
+          <strong>Last Updated:</strong>
+          <span>{new Date().toLocaleDateString()}</span>
+        </div>
       </div>
     </section>
   );
@@ -299,55 +340,32 @@ function Home() {
       </section>
 
       <section className="statsBanner">
-        <div>{clinics.length} Clinics</div>
-        <div>{counties.length} Counties</div>
-        <div>{highSchoolFriendlyCount} High School Friendly</div>
+        <div>
+          <strong>{clinics.length}</strong>
+          <span>Clinics</span>
+        </div>
+
+        <div>
+          <strong>{counties.length}</strong>
+          <span>Counties</span>
+        </div>
+
+        <div>
+          <strong>{highSchoolFriendlyCount}</strong>
+          <span>High School Friendly</span>
+        </div>
       </section>
+
+      <div className="missionBanner">
+        Helping students discover healthcare volunteering, shadowing, community outreach,
+        and service-learning opportunities throughout Georgia.
+      </div>
 
       <section className="sectionTitle">
         <h2>Clinic opportunities</h2>
         <p>{filteredClinics.length} matching clinics</p>
       </section>
 
-     <section className="projectInfoCard">
-  <h3>Project Information</h3>
-
-  <div className="projectInfoGrid">
-    <div>
-      <strong>Project:</strong>
-      <span>Openvol</span>
-    </div>
-
-    <div>
-      <strong>Created By:</strong>
-      <span>Rithvik Lal</span>
-    </div>
-
-    <div>
-      <strong>School:</strong>
-      <span>Lassiter High School</span>
-    </div>
-
-    <div>
-      <strong>Role:</strong>
-      <span>Founder & Student Researcher</span>
-    </div>
-
-    <div>
-      <strong>Purpose:</strong>
-      <span>
-        Connecting students with healthcare volunteering opportunities
-        across Georgia.
-      </span>
-    </div>
-
-    <div>
-      <strong>Last Updated:</strong>
-      <span>{new Date().toLocaleDateString()}</span>
-    </div>
-  </div>
-</section>
-      
       {loading ? (
         <p className="loading">Loading clinics...</p>
       ) : (
@@ -498,6 +516,8 @@ function Admin() {
         <h1>Admin Dashboard</h1>
         <p>Anonymous engagement metrics</p>
       </section>
+
+      <ProjectInfoCard />
 
       <section className="metricGrid">
         <div>
