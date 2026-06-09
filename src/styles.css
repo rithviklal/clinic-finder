@@ -323,3 +323,41 @@ footer {
     grid-template-columns: 1fr;
   }
 }
+/* ==========================================================
+   MISSION BANNER
+   ========================================================== */
+
+.missionBanner {
+  margin: 20px 7%;
+  padding: 18px 24px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #e0f2fe, #ecfeff);
+  color: #0f766e;
+  font-weight: 700;
+  text-align: center;
+  box-shadow: 0 12px 34px rgba(15, 35, 55, 0.06);
+}
+
+/* Better stats numbers */
+.statsBanner strong {
+  display: block;
+  font-size: 32px;
+  color: #0f2337;
+  line-height: 1;
+}
+
+.statsBanner span {
+  display: block;
+  margin-top: 6px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+/* Mobile mission banner */
+@media (max-width: 768px) {
+  .missionBanner {
+    margin: 18px 5%;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+}
