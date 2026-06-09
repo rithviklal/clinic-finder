@@ -239,35 +239,18 @@ footer {
 .brand {
   display: flex;
   align-items: center;
-  gap: 16px;
   cursor: pointer;
 }
 
-.brandText {
+.brandText,
+.brandName,
+.brandTagline {
   display: none;
 }
 
-.brandName {
-  font-size: 20px;
-  font-weight: 800;
-  color: #122033;
-  line-height: 1;
-}
-
-.brandTagline {
-  font-size: 11px;
-  color: #64748b;
-  font-weight: 500;
-  margin-top: 3px;
-}
-
 @media (max-width: 768px) {
-  .brandTagline {
-    display: none;
-  }
-
   .siteLogo {
-    width: 42px;
-    height: 42px;
+    width: 140px;
+    height: auto;
   }
 }
