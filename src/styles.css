@@ -361,3 +361,42 @@ footer {
     line-height: 1.5;
   }
 }
+/* ==========================================================
+   NO RESULTS MESSAGE
+   ========================================================== */
+
+.noResults {
+  margin: 30px 7% 60px;
+  padding: 40px;
+  text-align: center;
+
+  background: white;
+  border: 1px solid #e5eef8;
+  border-radius: 24px;
+
+  box-shadow: 0 15px 50px rgba(15, 35, 55, 0.07);
+}
+
+.noResults h3 {
+  margin: 0 0 12px;
+  color: #0f2337;
+  font-size: 28px;
+}
+
+.noResults p {
+  color: #64748b;
+  max-width: 600px;
+  margin: 0 auto 20px;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .noResults {
+    margin: 20px 5% 40px;
+    padding: 24px;
+  }
+
+  .noResults h3 {
+    font-size: 22px;
+  }
+}
