@@ -29,17 +29,38 @@ import './styles.css';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Tooltip, Legend);
 
-function Header({ setRoute }) {
+function Header({ setRoute, route }) {
   return (
     <header className="header">
       <div className="brand" onClick={() => setRoute('home')}>
-        <img src="/openvol-logo.png" alt="Openvol" className="siteLogo" />
+        <img
+          src="/openvol-logo.png"
+          alt="Openvol"
+          className="siteLogo"
+        />
       </div>
 
       <nav>
-        <button onClick={() => setRoute('home')}>Clinics</button>
-        <button onClick={() => setRoute('opportunities')}>Shadowing & Research</button>
-        <button onClick={() => setRoute('tracker')}>My Tracker</button>
+        <button
+          className={route === 'home' ? 'active' : ''}
+          onClick={() => setRoute('home')}
+        >
+          Clinics
+        </button>
+
+        <button
+          className={route === 'opportunities' ? 'active' : ''}
+          onClick={() => setRoute('opportunities')}
+        >
+          Shadowing & Research
+        </button>
+
+        <button
+          className={route === 'tracker' ? 'active' : ''}
+          onClick={() => setRoute('tracker')}
+        >
+          My Tracker
+        </button>
       </nav>
     </header>
   );
