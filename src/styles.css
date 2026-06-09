@@ -254,3 +254,32 @@ footer {
     height: auto;
   }
 }
+.availableBadge {
+  margin: 12px 0;
+  padding: 12px;
+  border-radius: 12px;
+  background: #dcfce7;
+  color: #166534;
+  font-weight: 700;
+  text-align: center;
+}
+
+.limitedBadge {
+  margin: 12px 0;
+  padding: 12px;
+  border-radius: 12px;
+  background: #fef3c7;
+  color: #92400e;
+  font-weight: 700;
+  text-align: center;
+}
+
+.unavailableBadge {
+  margin: 12px 0;
+  padding: 12px;
+  border-radius: 12px;
+  background: #fee2e2;
+  color: #991b1b;
+  font-weight: 700;
+  text-align: center;
+}
