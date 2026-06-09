@@ -120,7 +120,23 @@ function ClinicCard({ clinic }) {
         <div className="cardTop">
           <span className="ageBadge">{clinic.minimum_age ? `${clinic.minimum_age}+` : 'Ask'}</span>
         </div>
+ {clinic.availability_status === 'available' && (
+  <div className="availableBadge">
+    ✓ Accepting Volunteers
+  </div>
+)}
 
+{clinic.availability_status === 'limited' && (
+  <div className="limitedBadge">
+    ⚠ Limited Volunteer Opportunities
+  </div>
+)}
+
+{clinic.availability_status === 'unavailable' && (
+  <div className="unavailableBadge">
+    ✕ Volunteering / Shadowing Currently Not Available
+  </div>
+)}
         <p className="location">
           <MapPin size={16} />
           {clinic.city}, {clinic.county} County
