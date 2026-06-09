@@ -283,3 +283,43 @@ footer {
   font-weight: 700;
   text-align: center;
 }
+.projectInfoCard {
+  margin: 20px 7%;
+  background: white;
+  border: 1px solid #e5eef8;
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 15px 50px rgba(15, 35, 55, 0.07);
+}
+
+.projectInfoCard h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #0f2337;
+}
+
+.projectInfoGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+.projectInfoGrid div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.projectInfoGrid strong {
+  color: #0f2337;
+}
+
+.projectInfoGrid span {
+  color: #64748b;
+}
+
+@media (max-width: 768px) {
+  .projectInfoGrid {
+    grid-template-columns: 1fr;
+  }
+}
