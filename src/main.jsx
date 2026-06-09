@@ -32,17 +32,11 @@ function Header({ setRoute }) {
   return (
     <header className="header">
       <div className="brand" onClick={() => setRoute('home')}>
-        <img
-          src="/openvol-logo.png"
-          alt="Openvol"
-          className="siteLogo"
-        />
+        <img src="/openvol-logo.png" alt="Openvol" className="siteLogo" />
       </div>
 
       <nav>
-        <button onClick={() => setRoute('home')}>
-          Clinics
-        </button>
+        <button onClick={() => setRoute('home')}>Clinics</button>
       </nav>
     </header>
   );
@@ -112,31 +106,31 @@ function ClinicCard({ clinic }) {
             .join('')
             .toUpperCase()}
         </div>
-
-        <div className="clinicLogoName">{clinic.clinic_name}</div>
       </div>
 
       <div className="cardBody">
         <div className="cardTop">
-          <span className="ageBadge">{clinic.minimum_age ? `${clinic.minimum_age}+` : 'Ask'}</span>
+          <h3>{clinic.clinic_name}</h3>
+
+          <span className="ageBadge">
+            {clinic.minimum_age ? `${clinic.minimum_age}+` : 'Ask'}
+          </span>
         </div>
- {clinic.availability_status === 'available' && (
-  <div className="availableBadge">
-    ✓ Accepting Volunteers
-  </div>
-)}
 
-{clinic.availability_status === 'limited' && (
-  <div className="limitedBadge">
-    ⚠ Limited Volunteer Opportunities
-  </div>
-)}
+        {clinic.availability_status === 'available' && (
+          <div className="availableBadge">✓ Accepting Volunteers</div>
+        )}
 
-{clinic.availability_status === 'unavailable' && (
-  <div className="unavailableBadge">
-    ✕ Volunteering / Shadowing Currently Not Available
-  </div>
-)}
+        {clinic.availability_status === 'limited' && (
+          <div className="limitedBadge">⚠ Limited Volunteer Opportunities</div>
+        )}
+
+        {clinic.availability_status === 'unavailable' && (
+          <div className="unavailableBadge">
+            ✕ Volunteering / Shadowing Currently Not Available
+          </div>
+        )}
+
         <p className="location">
           <MapPin size={16} />
           {clinic.city}, {clinic.county} County
@@ -147,13 +141,15 @@ function ClinicCard({ clinic }) {
         <p>{clinic.notes}</p>
 
         <div className="tags">
-          {clinic.volunteer_type
-            ? clinic.volunteer_type.split(',').map((tag) => (
-                <span key={tag.trim()}>
-                  {tag.trim()}
-                </span>
-              ))
-            : <span>Volunteer Opportunity</span>}
+          {clinic.volunteer_type ? (
+            clinic.volunteer_type.split(',').map((tag) => (
+              <span key={tag.trim()}>
+                {tag.trim()}
+              </span>
+            ))
+          ) : (
+            <span>Volunteer Opportunity</span>
+          )}
         </div>
 
         <div className="requirements">
