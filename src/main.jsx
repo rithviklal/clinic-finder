@@ -1110,7 +1110,7 @@ function App() {
 
   return (
     <>
-      <Header setRoute={setRoute} />
+      <Header setRoute={setRoute} route={route} />
 
       {route === 'admin' ? (
         <Admin />
