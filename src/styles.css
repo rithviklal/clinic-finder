@@ -522,3 +522,28 @@ nav button.active {
     margin-top: 10px;
   }
 }
+/* ==========================================================
+   STUDENT EMAIL / PRIVACY NOTICE
+   ========================================================== */
+
+.studentEmailBox {
+  width: 100%;
+}
+
+.privacyNotice {
+  margin-top: 10px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #64748b;
+  max-width: 650px;
+}
+
+.privacyNotice::before {
+  content: "🔒 ";
+}
+
+@media (max-width: 768px) {
+  .privacyNotice {
+    font-size: 11px;
+  }
+}
