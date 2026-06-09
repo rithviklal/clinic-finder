@@ -309,6 +309,45 @@ function Home() {
         <p>{filteredClinics.length} matching clinics</p>
       </section>
 
+     <section className="projectInfoCard">
+  <h3>Project Information</h3>
+
+  <div className="projectInfoGrid">
+    <div>
+      <strong>Project:</strong>
+      <span>Openvol</span>
+    </div>
+
+    <div>
+      <strong>Created By:</strong>
+      <span>Rithvik Lal</span>
+    </div>
+
+    <div>
+      <strong>School:</strong>
+      <span>Lassiter High School</span>
+    </div>
+
+    <div>
+      <strong>Role:</strong>
+      <span>Founder & Student Researcher</span>
+    </div>
+
+    <div>
+      <strong>Purpose:</strong>
+      <span>
+        Connecting students with healthcare volunteering opportunities
+        across Georgia.
+      </span>
+    </div>
+
+    <div>
+      <strong>Last Updated:</strong>
+      <span>{new Date().toLocaleDateString()}</span>
+    </div>
+  </div>
+</section>
+      
       {loading ? (
         <p className="loading">Loading clinics...</p>
       ) : (
