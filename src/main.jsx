@@ -31,12 +31,20 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Tooltip, Le
 function Header({ setRoute }) {
   return (
     <header className="header">
-      <div className="brand" onClick={() => setRoute('home')}>
-        <div className="logo">
-          <HeartPulse size={24} />
-        </div>
-        <span>Openvol</span>
-      </div>
+<div className="brand" onClick={() => setRoute('home')}>
+  <img
+    src="/openvol-logo.png"
+    alt="Openvol Logo"
+    className="siteLogo"
+  />
+
+  <div className="brandText">
+    <span className="brandName">Openvol</span>
+    <span className="brandTagline">
+      Healthcare Volunteering Directory
+    </span>
+  </div>
+</div>
 
       <nav>
         <button onClick={() => setRoute('home')}>Clinics</button>
