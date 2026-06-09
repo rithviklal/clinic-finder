@@ -403,14 +403,24 @@ function OpportunityCard({ opportunity, studentEmail }) {
 function StudentEmailBox({ studentEmail, setStudentEmail }) {
   return (
     <section className="missionBanner">
-      <b>Save opportunities to your tracker:</b>{' '}
-      <input
-        style={{ maxWidth: '320px', marginLeft: '10px' }}
-        type="email"
-        placeholder="Enter your email"
-        value={studentEmail}
-        onChange={(event) => setStudentEmail(event.target.value)}
-      />
+      <div className="studentEmailBox">
+        <b>Save opportunities to your tracker:</b>
+
+        <input
+          style={{ maxWidth: '320px', marginLeft: '10px' }}
+          type="email"
+          placeholder="Enter your email"
+          value={studentEmail}
+          onChange={(event) => setStudentEmail(event.target.value)}
+        />
+
+        <p className="privacyNotice">
+          Openvol uses your email address solely to save clinics,
+          shadowing opportunities, research opportunities, and
+          application tracking information. Student data is never
+          sold, shared, or distributed to third parties.
+        </p>
+      </div>
     </section>
   );
 }
