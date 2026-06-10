@@ -1112,7 +1112,7 @@ function Admin() {
   };
 
   return (
-    <main className="admin">
+  <main className="admin">
       <section className="sectionTitle">
         <h1>Admin Dashboard</h1>
         <p>Openvol platform metrics</p>
@@ -1200,40 +1200,6 @@ function Admin() {
                   <td>{item.rating} ⭐</td>
                   <td>{item.comments || 'No comments'}</td>
                   <td>{new Date(item.created_at).toLocaleString()}</td>
-                </tr>
-              ))}
-          </tbody>
-        </table>
-      </section>
-    </main>
-  );
-}
-
-      <section className="tableCard">
-        <h3>Recent Clinic Clicks</h3>
-
-        <table>
-          <thead>
-            <tr>
-              <th>Clinic</th>
-              <th>City</th>
-              <th>Device</th>
-              <th>Browser</th>
-              <th>Clicked At</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {metrics.clicks
-              .slice(-15)
-              .reverse()
-              .map((click) => (
-                <tr key={click.id}>
-                  <td>{click.clinics?.clinic_name}</td>
-                  <td>{click.clinics?.city}</td>
-                  <td>{click.device_type}</td>
-                  <td>{click.browser}</td>
-                  <td>{new Date(click.clicked_at).toLocaleString()}</td>
                 </tr>
               ))}
           </tbody>
