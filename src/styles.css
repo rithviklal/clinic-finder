@@ -624,3 +624,75 @@ nav button.active {
   margin-right: auto;
   max-width: 700px;
 }
+
+/* ==========================================================
+   CLEAN ADMIN DASHBOARD
+   ========================================================== */
+
+.adminSummaryGrid {
+  padding: 20px 7%;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+}
+
+.adminSummaryGrid div {
+  background: linear-gradient(135deg, #0f2337, #164e63);
+  color: white;
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 15px 45px rgba(15, 35, 55, 0.12);
+}
+
+.adminSummaryGrid b {
+  display: block;
+  font-size: 34px;
+  line-height: 1;
+}
+
+.adminSummaryGrid span {
+  display: block;
+  margin-top: 8px;
+  opacity: 0.85;
+  font-size: 14px;
+}
+
+.adminChartsGrid {
+  padding: 10px 7%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+}
+
+.adminChartsGrid .chartCard:nth-child(3) {
+  grid-column: span 2;
+  max-width: 620px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+@media (max-width: 1000px) {
+  .adminSummaryGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .adminChartsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .adminChartsGrid .chartCard:nth-child(3) {
+    grid-column: span 1;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .adminSummaryGrid {
+    grid-template-columns: 1fr;
+    padding: 20px 5%;
+  }
+
+  .adminChartsGrid {
+    padding: 10px 5%;
+  }
+}
