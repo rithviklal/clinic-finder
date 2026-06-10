@@ -1273,16 +1273,28 @@ function App() {
       {route === 'admin' ? (
         <Admin />
       ) : route === 'opportunities' ? (
-        <Opportunities studentEmail={studentEmail} setStudentEmail={setStudentEmail} />
+        <Opportunities
+          studentEmail={studentEmail}
+          setStudentEmail={setStudentEmail}
+        />
       ) : route === 'tracker' ? (
-        <Tracker studentEmail={studentEmail} setStudentEmail={setStudentEmail} />
+        <Tracker
+          studentEmail={studentEmail}
+          setStudentEmail={setStudentEmail}
+        />
       ) : (
-        <Home studentEmail={studentEmail} setStudentEmail={setStudentEmail} />
+        <Home
+          studentEmail={studentEmail}
+          setStudentEmail={setStudentEmail}
+        />
       )}
 
       <footer>
         <div>© {new Date().getFullYear()} Openvol</div>
-        <div>Student-led healthcare volunteering directory for Greater Atlanta.</div>
+
+        <div>
+          Student-led healthcare volunteering directory for Greater Atlanta.
+        </div>
 
         <button className="adminLink" onClick={() => setRoute('admin')}>
           Admin Dashboard
