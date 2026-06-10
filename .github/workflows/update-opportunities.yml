@@ -1,4 +1,4 @@
-name: Update Shadowing and Research Opportunities
+name: Update Opportunities
 
 on:
   schedule:
@@ -11,16 +11,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
-      - name: Install Supabase client
-        run: npm install @supabase/supabase-js
+      - name: Show files
+        run: |
+          pwd
+          ls -la
+          ls -la scripts
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Verify secrets
+        run: |
+          if [ -z "${SUPABASE_URL}" ]; then echo "SUPABASE_URL missing"; exit 1; fi
+          if [ -z "${SUPABASE_SERVICE_ROLE_KEY}" ]; then echo "SUPABASE_SERVICE_ROLE_KEY missing"; exit 1; fi
+          echo "Secrets found"
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
       - name: Run opportunity verifier
         run: node scripts/update-opportunities.js
