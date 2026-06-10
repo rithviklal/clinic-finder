@@ -411,6 +411,42 @@ function OpportunityCard({ opportunity, studentEmail }) {
               Website
             </button>
           )}
+
+        {opportunity.availability_status === 'available' && (
+  <div className="availableBadge">
+    ✓ Currently Available
+  </div>
+)}
+
+{opportunity.availability_status === 'limited' && (
+  <div className="limitedBadge">
+    ⚠ Limited Availability
+  </div>
+)}
+
+{opportunity.availability_status === 'waitlist' && (
+  <div className="limitedBadge">
+    ⏳ Waitlist Only
+  </div>
+)}
+
+{opportunity.availability_status === 'closed' && (
+  <div className="unavailableBadge">
+    Application Period Closed
+  </div>
+)}
+
+{opportunity.availability_status === 'unavailable' && (
+  <div className="unavailableBadge">
+    Shadowing / Research Not Currently Available
+  </div>
+)}
+
+          {opportunity.last_verified && (
+  <div className="verifiedDate">
+    Verified: {new Date(opportunity.last_verified).toLocaleDateString()}
+  </div>
+)}
         </div>
       </div>
     </article>
