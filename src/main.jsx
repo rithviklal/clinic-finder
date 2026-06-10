@@ -1101,6 +1101,79 @@ function Admin() {
   );
 }
 
+function FeedbackSection() {
+  const [rating, setRating] = useState(0);
+  const [comments, setComments] = useState('');
+  const [submitted, setSubmitted] = useState(false);
+
+  async function submitFeedback() {
+    if (!rating) {
+      alert('Please select a rating.');
+      return;
+    }
+
+    const { error } = await supabase
+      .from('website_feedback')
+      .insert({
+        rating,
+        comments
+      });
+
+    if (error) {
+      console.error(error);
+      alert('Unable to submit feedback.');
+      return;
+    }
+
+    setSubmitted(true);
+  }
+
+  if (submitted) {
+    return (
+      <section className="feedbackSection">
+        <h3>Thank You!</h3>
+        <p>Your feedback helps improve Openvol.</p>
+      </section>
+    );
+  }
+
+  return (
+    <section className="feedbackSection">
+      <h3>Rate Your Experience</h3>
+
+      <p>
+        How helpful was Openvol in finding volunteering,
+        shadowing, or research opportunities?
+      </p>
+
+      <div className="ratingButtons">
+        {[1,2,3,4,5].map(num => (
+          <button
+            key={num}
+            className={rating === num ? 'ratingActive' : ''}
+            onClick={() => setRating(num)}
+          >
+            ⭐ {num}
+          </button>
+        ))}
+      </div>
+
+      <textarea
+        placeholder="Optional comments or suggestions..."
+        value={comments}
+        onChange={(e) => setComments(e.target.value)}
+      />
+
+      <button
+        className="primary"
+        onClick={submitFeedback}
+      >
+        Submit Feedback
+      </button>
+    </section>
+  );
+}
+
 function App() {
   const [route, setRoute] = useState(
     location.pathname.startsWith('/admin') ? 'admin' : 'home'
