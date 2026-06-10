@@ -1,7 +1,286 @@
-:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;color:#122033;background:#f7fbff}*{box-sizing:border-box}body{margin:0}.header{position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center;padding:18px 7%;background:rgba(255,255,255,.88);backdrop-filter:blur(14px);border-bottom:1px solid #e7eef7}.brand{display:flex;align-items:center;gap:12px;font-weight:800;font-size:20px;cursor:pointer}.logo{width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,#0ea5e9,#14b8a6);display:grid;place-items:center;color:white}nav{display:flex;gap:10px}button{border:0;background:#edf5ff;padding:11px 16px;border-radius:999px;cursor:pointer;font-weight:700;color:#14324a}button:hover{transform:translateY(-1px)}.primary{background:linear-gradient(135deg,#0ea5e9,#14b8a6);color:white;display:inline-flex;align-items:center;gap:8px}.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:44px;padding:72px 7% 44px;align-items:center;background:radial-gradient(circle at 10% 10%,#dff7ff,transparent 30%),linear-gradient(180deg,#ffffff,#f4fbff)}.eyebrow{display:inline-flex;align-items:center;gap:8px;background:#e7fbf8;color:#0f766e;padding:9px 14px;border-radius:999px;font-weight:800}.hero h1{font-size:clamp(40px,6vw,72px);line-height:.95;margin:20px 0;color:#0f2337;letter-spacing:-2px}.hero p{font-size:19px;line-height:1.65;color:#536579;max-width:640px}.heroStats{display:flex;gap:14px;flex-wrap:wrap;margin-top:28px}.heroStats div{background:white;border:1px solid #e1edf8;border-radius:22px;padding:18px 24px;box-shadow:0 10px 30px rgba(15,35,55,.06)}.heroStats b{display:block;font-size:24px}.heroStats span{color:#65758b}.heroCard{position:relative}.heroCard img{width:100%;height:520px;object-fit:cover;border-radius:36px;box-shadow:0 25px 80px rgba(15,35,55,.18)}.floating{position:absolute;bottom:22px;left:22px;background:white;padding:16px 18px;border-radius:18px;display:flex;gap:10px;align-items:center;font-weight:800;box-shadow:0 18px 50px rgba(0,0,0,.16)}.searchPanel{margin:12px 7% 34px;background:white;border:1px solid #e3edf8;border-radius:28px;padding:18px;display:grid;grid-template-columns:2fr 1fr 1fr .8fr;gap:12px;box-shadow:0 15px 50px rgba(15,35,55,.07)}input,select{width:100%;border:1px solid #dbe7f3;background:#f8fbff;border-radius:16px;padding:14px 15px;font-size:15px}.searchBox{display:flex;align-items:center;gap:10px;background:#f8fbff;border:1px solid #dbe7f3;border-radius:16px;padding-left:14px}.searchBox input{border:0;background:transparent;outline:0}.sectionTitle{padding:6px 7%;display:flex;justify-content:space-between;align-items:end}.sectionTitle h2,.sectionTitle h1{font-size:34px;margin:0;color:#122033}.sectionTitle p{color:#65758b}.grid{padding:20px 7% 60px;display:grid;grid-template-columns:repeat(3,1fr);gap:26px}.clinicCard{background:white;border:1px solid #e5eef8;border-radius:28px;overflow:hidden;box-shadow:0 18px 50px rgba(15,35,55,.08)}.clinicCard img{width:100%;height:210px;object-fit:cover}.cardBody{padding:22px}.cardTop{display:flex;justify-content:space-between;gap:15px}.cardTop h3{font-size:22px;margin:0 0 8px}.cardTop span{background:#ecfeff;color:#0e7490;padding:7px 11px;border-radius:999px;font-weight:900;height:max-content}.location{display:flex;align-items:center;gap:8px;color:#64748b}.tags span{display:inline-block;background:#f1f5f9;color:#334155;padding:8px 10px;border-radius:12px;font-size:13px;margin:8px 0}.requirements{background:#f8fbff;border-radius:16px;padding:13px;margin:10px 0;color:#475569}.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:15px}.impact{padding:10px 7% 80px;display:grid;grid-template-columns:1fr 1fr;gap:22px}.impact>div,.chartCard,.tableCard,.adminLogin>div{background:white;border:1px solid #e5eef8;border-radius:28px;padding:28px;box-shadow:0 15px 50px rgba(15,35,55,.07)}.impact svg{color:#0ea5e9}.admin{padding-bottom:70px}.adminLogin{min-height:70vh;display:grid;place-items:center;padding:7%}.adminLogin>div{max-width:460px;text-align:center}.adminLogin svg{color:#0ea5e9}.adminLogin h1{font-size:40px}.adminLogin input{margin:16px 0}.metricGrid{padding:20px 7%;display:grid;grid-template-columns:repeat(4,1fr);gap:18px}.metricGrid div{background:linear-gradient(135deg,#0f2337,#164e63);color:white;border-radius:24px;padding:28px}.metricGrid b{display:block;font-size:38px}.metricGrid span{opacity:.8}.charts{padding:10px 7%;display:grid;grid-template-columns:1.3fr .7fr;gap:22px}.tableCard{margin:22px 7%;overflow:auto}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px;border-bottom:1px solid #e5eef8}th{color:#64748b}.loading{padding:40px 7%;font-weight:800}footer{text-align:center;padding:34px;color:#64748b;background:#eef7ff}@media(max-width:1000px){.hero,.grid,.impact,.charts{grid-template-columns:1fr}.searchPanel,.metricGrid{grid-template-columns:1fr 1fr}.heroCard img{height:380px}}@media(max-width:640px){.header{padding:14px 5%}.brand span{font-size:16px}.hero{padding:42px 5%}.searchPanel,.grid,.impact,.metricGrid,.charts{margin-left:5%;margin-right:5%;padding-left:0;padding-right:0;grid-template-columns:1fr}.sectionTitle{padding:5%}.hero h1{font-size:42px}.heroStats{display:grid}.actions button{width:100%;justify-content:center}}
 /* ==========================================================
-   OPENVOL CLINIC LOGO / NAME CARDS
+   OPENVOL GLOBAL STYLES
    ========================================================== */
+
+:root {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif;
+  color: #122033;
+  background: #f7fbff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #f7fbff;
+}
+
+button {
+  border: 0;
+  background: #edf5ff;
+  padding: 11px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 700;
+  color: #14324a;
+  transition: all 0.2s ease;
+}
+
+button:hover {
+  background: #dbeafe;
+  transform: translateY(-2px);
+}
+
+.primary {
+  background: linear-gradient(135deg, #0ea5e9, #14b8a6);
+  color: white;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  border: 1px solid #dbe7f3;
+  background: #f8fbff;
+  border-radius: 16px;
+  padding: 14px 15px;
+  font-size: 15px;
+  font-family: inherit;
+}
+
+/* ==========================================================
+   HEADER / NAVIGATION
+   ========================================================== */
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 7%;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid #e5eef8;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.siteLogo {
+  width: 220px;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.brandText,
+.brandName,
+.brandTagline,
+.logo {
+  display: none;
+}
+
+nav {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+nav button {
+  white-space: nowrap;
+}
+
+nav button.active {
+  background: linear-gradient(135deg, #0ea5e9, #14b8a6);
+  color: white;
+}
+
+/* ==========================================================
+   HERO
+   ========================================================== */
+
+.hero {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 44px;
+  padding: 72px 7% 44px;
+  align-items: center;
+  background:
+    radial-gradient(circle at 10% 10%, #dff7ff, transparent 30%),
+    linear-gradient(180deg, #ffffff, #f4fbff);
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #e7fbf8;
+  color: #0f766e;
+  padding: 9px 14px;
+  border-radius: 999px;
+  font-weight: 800;
+}
+
+.hero h1 {
+  font-size: clamp(40px, 6vw, 72px);
+  line-height: 0.95;
+  margin: 20px 0;
+  color: #0f2337;
+  letter-spacing: -2px;
+}
+
+.hero p {
+  font-size: 19px;
+  line-height: 1.65;
+  color: #536579;
+  max-width: 640px;
+}
+
+.heroStats {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 28px;
+}
+
+.heroStats div {
+  background: white;
+  border: 1px solid #e1edf8;
+  border-radius: 22px;
+  padding: 18px 24px;
+  box-shadow: 0 10px 30px rgba(15, 35, 55, 0.06);
+}
+
+.heroStats b {
+  display: block;
+  font-size: 24px;
+}
+
+.heroStats span {
+  color: #65758b;
+}
+
+.heroCard {
+  position: relative;
+}
+
+.heroCard img {
+  width: 100%;
+  height: 520px;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 36px;
+  box-shadow: 0 25px 80px rgba(15, 35, 55, 0.18);
+}
+
+.floating {
+  position: absolute;
+  bottom: 22px;
+  left: 22px;
+  background: white;
+  padding: 16px 18px;
+  border-radius: 18px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-weight: 800;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.16);
+}
+
+/* ==========================================================
+   SEARCH / FILTERS
+   ========================================================== */
+
+.searchPanel {
+  margin: 12px 7% 34px;
+  background: white;
+  border: 1px solid #e3edf8;
+  border-radius: 28px;
+  padding: 18px;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 0.8fr;
+  gap: 12px;
+  box-shadow: 0 15px 50px rgba(15, 35, 55, 0.07);
+}
+
+.searchBox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f8fbff;
+  border: 1px solid #dbe7f3;
+  border-radius: 16px;
+  padding-left: 14px;
+}
+
+.searchBox input {
+  border: 0;
+  background: transparent;
+  outline: 0;
+}
+
+/* ==========================================================
+   GENERAL LAYOUT
+   ========================================================== */
+
+.sectionTitle {
+  padding: 6px 7%;
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+}
+
+.sectionTitle h1,
+.sectionTitle h2 {
+  font-size: 34px;
+  margin: 0;
+  color: #122033;
+}
+
+.sectionTitle p {
+  color: #65758b;
+}
+
+.grid {
+  padding: 20px 7% 60px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 26px;
+}
+
+.loading {
+  padding: 40px 7%;
+  font-weight: 800;
+}
+
+/* ==========================================================
+   CLINIC / OPPORTUNITY CARDS
+   ========================================================== */
+
+.clinicCard {
+  background: white;
+  border: 1px solid #e5eef8;
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: 0 18px 50px rgba(15, 35, 55, 0.08);
+  transition: all 0.25s ease;
+}
+
+.clinicCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 24px 60px rgba(15, 35, 55, 0.12);
+}
 
 .clinicLogoBox {
   height: 210px;
@@ -10,13 +289,7 @@
   align-items: center;
   justify-content: center;
   gap: 14px;
-
-  background: linear-gradient(
-    135deg,
-    #eefdf8 0%,
-    #f8fbff 100%
-  );
-
+  background: linear-gradient(135deg, #eefdf8 0%, #f8fbff 100%);
   border-bottom: 1px solid #e5edf5;
   padding: 20px;
 }
@@ -25,59 +298,92 @@
   width: 90px;
   height: 90px;
   object-fit: contain;
-
   background: white;
   border-radius: 18px;
   padding: 12px;
-
   box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
-}
-
-.clinicLogoName {
-  max-width: 240px;
-  text-align: center;
-
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 1.3;
-
-  color: #122033;
 }
 
 .clinicInitials {
   width: 90px;
   height: 90px;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   border-radius: 22px;
-
-  background: linear-gradient(
-    135deg,
-    #0ea5e9,
-    #14b8a6
-  );
-
+  background: linear-gradient(135deg, #0ea5e9, #14b8a6);
   color: white;
   font-size: 28px;
   font-weight: 800;
-
   box-shadow: 0 10px 30px rgba(15, 23, 42, 0.15);
 }
 
-/* ==========================================================
-   OPTIONAL IMPROVEMENTS
-   ========================================================== */
-
-.clinicCard {
-  transition: all 0.25s ease;
+.cardBody {
+  padding: 22px;
 }
 
-.clinicCard:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 24px 60px rgba(15, 35, 55, 0.12);
+.cardTop {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.cardTop h3 {
+  font-size: 22px;
+  margin: 0 0 8px;
+  color: #0f2337;
+}
+
+.cardTop span,
+.ageBadge {
+  background: #ecfeff;
+  color: #0e7490;
+  padding: 7px 11px;
+  border-radius: 999px;
+  font-weight: 900;
+  height: max-content;
+}
+
+.location {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #64748b;
+  margin: 12px 0;
+}
+
+.address {
+  color: #64748b;
+  font-size: 14px;
+  margin: 6px 0 12px;
+  line-height: 1.4;
+}
+
+.tags span {
+  display: inline-block;
+  background: #ecfeff;
+  color: #0e7490;
+  padding: 8px 10px;
+  border-radius: 12px;
+  font-size: 13px;
+  margin: 8px 0;
+  font-weight: 600;
+}
+
+.requirements {
+  background: #f8fbff;
+  border-radius: 16px;
+  padding: 13px;
+  margin: 10px 0;
+  color: #475569;
+  line-height: 1.5;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 15px;
 }
 
 .actions button {
@@ -88,75 +394,44 @@
   transform: translateY(-2px);
 }
 
-.tags span {
-  background: #ecfeff;
-  color: #0e7490;
-  font-weight: 600;
-}
-
-.cardTop h3 {
-  color: #0f2337;
-}
-
-.location {
-  margin: 12px 0;
-}
-
-.requirements {
-  line-height: 1.5;
-}
-
-.heroCard img {
-  object-position: center;
-}
-
-.metricGrid div {
-  transition: all 0.25s ease;
-}
-
-.metricGrid div:hover {
-  transform: translateY(-3px);
-}
-
-.chartCard,
-.tableCard,
-.impact > div {
-  transition: all 0.25s ease;
-}
-
-.chartCard:hover,
-.tableCard:hover,
-.impact > div:hover {
-  box-shadow: 0 22px 60px rgba(15, 35, 55, 0.12);
-}
-
 /* ==========================================================
-   MOBILE IMPROVEMENTS
+   AVAILABILITY / STATUS BADGES
    ========================================================== */
 
-@media (max-width: 768px) {
-  .clinicLogoBox {
-    height: 180px;
-  }
+.availableBadge,
+.limitedBadge,
+.unavailableBadge {
+  margin: 12px 0;
+  padding: 12px;
+  border-radius: 12px;
+  font-weight: 700;
+  text-align: center;
+}
 
-  .clinicInitials {
-    width: 70px;
-    height: 70px;
-    font-size: 22px;
-  }
+.availableBadge {
+  background: #dcfce7;
+  color: #166534;
+}
 
-  .clinicLogoBox img {
-    width: 70px;
-    height: 70px;
-  }
+.limitedBadge {
+  background: #fef3c7;
+  color: #92400e;
+}
 
-  .clinicLogoName {
-    font-size: 13px;
-  }
+.unavailableBadge {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.verifiedDate {
+  margin: 10px 0;
+  font-size: 12px;
+  color: #64748b;
+  text-align: center;
 }
 
 /* ==========================================================
-   STATS BANNER / ADDRESS / FOOTER FIXES
+   STATS / MISSION / DISCLAIMER
    ========================================================== */
 
 .statsBanner {
@@ -177,29 +452,30 @@
   box-shadow: 0 12px 34px rgba(15, 35, 55, 0.07);
 }
 
-.address {
+.statsBanner strong {
+  display: block;
+  font-size: 32px;
+  color: #0f2337;
+  line-height: 1;
+}
+
+.statsBanner span {
+  display: block;
+  margin-top: 6px;
   color: #64748b;
   font-size: 14px;
-  margin: 6px 0 12px;
-  line-height: 1.4;
 }
 
-.adminLink {
-  margin-top: 12px;
-  background: #dbeafe;
-  color: #1e40af;
+.missionBanner {
+  margin: 20px 7%;
+  padding: 18px 24px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #e0f2fe, #ecfeff);
+  color: #0f766e;
+  font-weight: 700;
+  text-align: center;
+  box-shadow: 0 12px 34px rgba(15, 35, 55, 0.06);
 }
-
-footer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-
-/* ==========================================================
-   DISCLAIMER
-   ========================================================== */
 
 .disclaimer {
   margin: 0 7% 40px;
@@ -213,78 +489,101 @@ footer {
 }
 
 /* ==========================================================
-   MOBILE FIXES
+   STUDENT EMAIL / PRIVACY
    ========================================================== */
 
-@media (max-width: 768px) {
-  .statsBanner {
-    margin: 0 5% 24px;
-    grid-template-columns: 1fr;
-  }
+.studentEmailBox {
+  width: 100%;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
 
-  .disclaimer {
-    margin: 0 5% 32px;
-  }
+.studentEmailBox input {
+  max-width: 320px;
+  margin: 12px auto 0 !important;
+}
+
+.privacyNotice {
+  text-align: center;
+  margin: 10px auto 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #64748b;
+  max-width: 700px;
+}
+
+.privacyNotice::before {
+  content: "🔒 ";
 }
 
 /* ==========================================================
-   OPENVOL BRANDING
+   IMPACT SECTION
    ========================================================== */
 
-.siteLogo {
-  width: 220px;
-  height: auto;
-  object-fit: contain;
-  display: block;
+.impact {
+  padding: 10px 7% 80px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
 }
 
-.brand {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
+.impact > div,
+.chartCard,
+.tableCard,
+.adminLogin > div {
+  background: white;
+  border: 1px solid #e5eef8;
+  border-radius: 28px;
+  padding: 28px;
+  box-shadow: 0 15px 50px rgba(15, 35, 55, 0.07);
+  transition: all 0.25s ease;
 }
 
-.brandText,
-.brandName,
-.brandTagline {
-  display: none;
+.impact > div:hover,
+.chartCard:hover,
+.tableCard:hover {
+  box-shadow: 0 22px 60px rgba(15, 35, 55, 0.12);
 }
 
-@media (max-width: 768px) {
-  .siteLogo {
-    width: 140px;
-    height: auto;
-  }
+.impact svg {
+  color: #0ea5e9;
 }
-.availableBadge {
-  margin: 12px 0;
-  padding: 12px;
-  border-radius: 12px;
-  background: #dcfce7;
-  color: #166534;
-  font-weight: 700;
+
+/* ==========================================================
+   ADMIN DASHBOARD
+   ========================================================== */
+
+.admin {
+  padding-bottom: 70px;
+}
+
+.adminLogin {
+  min-height: 70vh;
+  display: grid;
+  place-items: center;
+  padding: 7%;
+}
+
+.adminLogin > div {
+  max-width: 460px;
   text-align: center;
 }
 
-.limitedBadge {
-  margin: 12px 0;
-  padding: 12px;
-  border-radius: 12px;
-  background: #fef3c7;
-  color: #92400e;
-  font-weight: 700;
-  text-align: center;
+.adminLogin svg {
+  color: #0ea5e9;
 }
 
-.unavailableBadge {
-  margin: 12px 0;
-  padding: 12px;
-  border-radius: 12px;
-  background: #fee2e2;
-  color: #991b1b;
-  font-weight: 700;
-  text-align: center;
+.adminLogin h1 {
+  font-size: 40px;
 }
+
+.adminLogin input {
+  margin: 16px 0;
+}
+
 .projectInfoCard {
   margin: 20px 7%;
   background: white;
@@ -320,238 +619,71 @@ footer {
   color: #64748b;
 }
 
-@media (max-width: 768px) {
-  .projectInfoGrid {
-    grid-template-columns: 1fr;
-  }
+.adminSummaryGrid {
+  padding: 20px 7%;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
 }
 
-/* ==========================================================
-   MISSION BANNER
-   ========================================================== */
-
-.missionBanner {
-  margin: 20px 7%;
-  padding: 18px 24px;
-  border-radius: 18px;
-  background: linear-gradient(135deg, #e0f2fe, #ecfeff);
-  color: #0f766e;
-  font-weight: 700;
-  text-align: center;
-  box-shadow: 0 12px 34px rgba(15, 35, 55, 0.06);
+.adminSummaryGrid div {
+  background: linear-gradient(135deg, #0f2337, #164e63);
+  color: white;
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 15px 45px rgba(15, 35, 55, 0.12);
 }
 
-/* Better stats numbers */
-.statsBanner strong {
+.adminSummaryGrid b {
   display: block;
-  font-size: 32px;
-  color: #0f2337;
+  font-size: 34px;
   line-height: 1;
 }
 
-.statsBanner span {
+.adminSummaryGrid span {
   display: block;
-  margin-top: 6px;
-  color: #64748b;
+  margin-top: 8px;
+  opacity: 0.85;
   font-size: 14px;
 }
 
-/* Mobile mission banner */
-@media (max-width: 768px) {
-  .missionBanner {
-    margin: 18px 5%;
-    font-size: 14px;
-    line-height: 1.5;
-  }
+.adminChartsGrid {
+  padding: 10px 7%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
 }
 
-/* ==========================================================
-   NO RESULTS MESSAGE
-   ========================================================== */
-
-.noResults {
-  margin: 30px 7% 60px;
-  padding: 40px;
-  text-align: center;
-
-  background: white;
-  border: 1px solid #e5eef8;
-  border-radius: 24px;
-
-  box-shadow: 0 15px 50px rgba(15, 35, 55, 0.07);
+.adminChartsGrid .chartCard:nth-child(3) {
+  grid-column: span 2;
+  max-width: 620px;
+  width: 100%;
+  margin: 0 auto;
 }
 
-.noResults h3 {
-  margin: 0 0 12px;
-  color: #0f2337;
-  font-size: 28px;
+.tableCard {
+  margin: 22px 7%;
+  overflow: auto;
 }
 
-.noResults p {
-  color: #64748b;
-  max-width: 600px;
-  margin: 0 auto 20px;
-  line-height: 1.6;
+.tableCard select {
+  min-width: 180px;
 }
 
-@media (max-width: 768px) {
-  .noResults {
-    margin: 20px 5% 40px;
-    padding: 24px;
-  }
-
-  .noResults h3 {
-    font-size: 22px;
-  }
+table {
+  width: 100%;
+  border-collapse: collapse;
 }
 
-/* ==========================================================
-   OPENVOL HEADER / NAVIGATION
-   ========================================================== */
-
-.header {
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  padding: 16px 7%;
-
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(14px);
-
+th,
+td {
+  text-align: left;
+  padding: 13px;
   border-bottom: 1px solid #e5eef8;
 }
 
-.brand {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-}
-
-.siteLogo {
-  width: 220px;
-  height: auto;
-  object-fit: contain;
-  display: block;
-}
-
-nav {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  align-items: center;
-}
-
-nav button {
-  border: none;
-
-  padding: 11px 18px;
-
-  border-radius: 999px;
-
-  background: #edf5ff;
-
-  color: #14324a;
-
-  font-weight: 700;
-
-  cursor: pointer;
-
-  transition: all 0.2s ease;
-
-  white-space: nowrap;
-}
-
-nav button:hover {
-  background: #dbeafe;
-  transform: translateY(-2px);
-}
-
-nav button.active {
-  background: linear-gradient(
-    135deg,
-    #0ea5e9,
-    #14b8a6
-  );
-
-  color: white;
-}
-
-/* ==========================================================
-   STUDENT EMAIL BOX
-   ========================================================== */
-
-.studentEmailBox {
-  margin: 20px 7%;
-}
-
-.studentEmailBox input {
-  max-width: 320px;
-  margin-left: 10px;
-}
-
-/* ==========================================================
-   MOBILE HEADER
-   ========================================================== */
-
-@media (max-width: 768px) {
-
-  .header {
-    flex-direction: column;
-    gap: 12px;
-    padding: 14px 5%;
-  }
-
-  .siteLogo {
-    width: 160px;
-  }
-
-  nav {
-    justify-content: center;
-    width: 100%;
-  }
-
-  nav button {
-    font-size: 13px;
-    padding: 10px 14px;
-  }
-
-  .studentEmailBox input {
-    max-width: 100%;
-    width: 100%;
-    margin-left: 0;
-    margin-top: 10px;
-  }
-}
-
-/* ==========================================================
-   STUDENT EMAIL / PRIVACY NOTICE
-   ========================================================== */
-
-.studentEmailBox {
-  width: 100%;
-}
-
-.privacyNotice {
-  margin-top: 10px;
-  font-size: 12px;
-  line-height: 1.5;
+th {
   color: #64748b;
-  max-width: 650px;
-}
-
-.privacyNotice::before {
-  content: "🔒 ";
-}
-
-@media (max-width: 768px) {
-  .privacyNotice {
-    font-size: 11px;
-  }
 }
 
 /* ==========================================================
@@ -564,7 +696,7 @@ nav button.active {
   border: 1px solid #e5eef8;
   border-radius: 28px;
   padding: 30px;
-  box-shadow: 0 15px 50px rgba(15,35,55,.07);
+  box-shadow: 0 15px 50px rgba(15, 35, 55, 0.07);
 }
 
 .feedbackSection h3 {
@@ -594,222 +726,72 @@ nav button.active {
 }
 
 .ratingActive {
-  background: linear-gradient(
-    135deg,
-    #0ea5e9,
-    #14b8a6
-  ) !important;
-
+  background: linear-gradient(135deg, #0ea5e9, #14b8a6) !important;
   color: white !important;
 }
 
 /* ==========================================================
-   CENTER EMAIL DISCLAIMER
+   NO RESULTS
    ========================================================== */
 
-.studentEmailBox {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.noResults {
+  margin: 30px 7% 60px;
+  padding: 40px;
   text-align: center;
-}
-
-.studentEmailBox input {
-  margin: 12px auto 0 !important;
-}
-
-.privacyNotice {
-  text-align: center;
-  margin-left: auto;
-  margin-right: auto;
-  max-width: 700px;
-}
-
-/* ==========================================================
-   CLEAN ADMIN DASHBOARD
-   ========================================================== */
-
-.adminSummaryGrid {
-  padding: 20px 7%;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 18px;
-}
-
-.adminSummaryGrid div {
-  background: linear-gradient(135deg, #0f2337, #164e63);
-  color: white;
+  background: white;
+  border: 1px solid #e5eef8;
   border-radius: 24px;
-  padding: 24px;
-  box-shadow: 0 15px 45px rgba(15, 35, 55, 0.12);
+  box-shadow: 0 15px 50px rgba(15, 35, 55, 0.07);
 }
 
-.adminSummaryGrid b {
-  display: block;
-  font-size: 34px;
-  line-height: 1;
+.noResults h3 {
+  margin: 0 0 12px;
+  color: #0f2337;
+  font-size: 28px;
 }
 
-.adminSummaryGrid span {
-  display: block;
-  margin-top: 8px;
-  opacity: 0.85;
-  font-size: 14px;
-}
-
-.adminChartsGrid {
-  padding: 10px 7%;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 22px;
-}
-
-.adminChartsGrid .chartCard:nth-child(3) {
-  grid-column: span 2;
-  max-width: 620px;
-  width: 100%;
-  margin: 0 auto;
-}
-
-@media (max-width: 1000px) {
-  .adminSummaryGrid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .adminChartsGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .adminChartsGrid .chartCard:nth-child(3) {
-    grid-column: span 1;
-    max-width: 100%;
-  }
-}
-
-@media (max-width: 640px) {
-  .adminSummaryGrid {
-    grid-template-columns: 1fr;
-    padding: 20px 5%;
-  }
-
-  .adminChartsGrid {
-    padding: 10px 5%;
-  }
-}
-
-/* ==========================================================
-   FINAL CLEAN OVERRIDES - OPENVOL
-   ========================================================== */
-
-.header {
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 7%;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(14px);
-  border-bottom: 1px solid #e5eef8;
-}
-
-.brand {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-}
-
-.siteLogo {
-  width: 220px;
-  height: auto;
-  object-fit: contain;
-  display: block;
-}
-
-nav {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  align-items: center;
-}
-
-nav button.active {
-  background: linear-gradient(135deg, #0ea5e9, #14b8a6);
-  color: white;
-}
-
-.studentEmailBox {
-  width: 100%;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-}
-
-.studentEmailBox input {
-  max-width: 320px;
-  margin: 12px auto 0 !important;
-}
-
-.privacyNotice {
-  text-align: center;
-  margin: 10px auto 0;
-  font-size: 12px;
-  line-height: 1.5;
+.noResults p {
   color: #64748b;
-  max-width: 700px;
+  max-width: 600px;
+  margin: 0 auto 20px;
+  line-height: 1.6;
 }
 
-.privacyNotice::before {
-  content: "🔒 ";
+/* ==========================================================
+   FOOTER
+   ========================================================== */
+
+footer {
+  text-align: center;
+  padding: 34px;
+  color: #64748b;
+  background: #eef7ff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
 }
 
-.adminSummaryGrid {
-  padding: 20px 7%;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 18px;
+.adminLink {
+  margin-top: 12px;
+  background: #dbeafe;
+  color: #1e40af;
 }
 
-.adminSummaryGrid div {
-  background: linear-gradient(135deg, #0f2337, #164e63);
-  color: white;
-  border-radius: 24px;
-  padding: 24px;
-  box-shadow: 0 15px 45px rgba(15, 35, 55, 0.12);
-}
-
-.adminSummaryGrid b {
-  display: block;
-  font-size: 34px;
-  line-height: 1;
-}
-
-.adminSummaryGrid span {
-  display: block;
-  margin-top: 8px;
-  opacity: 0.85;
-  font-size: 14px;
-}
-
-.adminChartsGrid {
-  padding: 10px 7%;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 22px;
-}
-
-.adminChartsGrid .chartCard:nth-child(3) {
-  grid-column: span 2;
-  max-width: 620px;
-  width: 100%;
-  margin: 0 auto;
-}
+/* ==========================================================
+   RESPONSIVE
+   ========================================================== */
 
 @media (max-width: 1000px) {
-  .adminSummaryGrid {
+  .hero,
+  .grid,
+  .impact {
+    grid-template-columns: 1fr;
+  }
+
+  .searchPanel,
+  .adminSummaryGrid,
+  .projectInfoGrid {
     grid-template-columns: repeat(2, 1fr);
   }
 
@@ -820,6 +802,10 @@ nav button.active {
   .adminChartsGrid .chartCard:nth-child(3) {
     grid-column: span 1;
     max-width: 100%;
+  }
+
+  .heroCard img {
+    height: 380px;
   }
 }
 
@@ -844,18 +830,90 @@ nav button.active {
     padding: 10px 14px;
   }
 
+  .clinicLogoBox {
+    height: 180px;
+  }
+
+  .clinicInitials,
+  .clinicLogoBox img {
+    width: 70px;
+    height: 70px;
+  }
+
+  .clinicInitials {
+    font-size: 22px;
+  }
+
+  .missionBanner {
+    margin: 18px 5%;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .statsBanner {
+    margin: 0 5% 24px;
+    grid-template-columns: 1fr;
+  }
+
+  .disclaimer {
+    margin: 0 5% 32px;
+  }
+
   .privacyNotice {
     font-size: 11px;
+  }
+
+  .noResults {
+    margin: 20px 5% 40px;
+    padding: 24px;
+  }
+
+  .noResults h3 {
+    font-size: 22px;
   }
 }
 
 @media (max-width: 640px) {
-  .adminSummaryGrid {
-    grid-template-columns: 1fr;
-    padding: 20px 5%;
+  .header {
+    padding: 14px 5%;
   }
 
+  .hero {
+    padding: 42px 5%;
+  }
+
+  .hero h1 {
+    font-size: 38px;
+    line-height: 1.05;
+  }
+
+  .heroStats {
+    display: grid;
+  }
+
+  .searchPanel,
+  .grid,
+  .impact,
+  .adminSummaryGrid,
   .adminChartsGrid {
-    padding: 10px 5%;
+    margin-left: 5%;
+    margin-right: 5%;
+    padding-left: 0;
+    padding-right: 0;
+    grid-template-columns: 1fr;
+  }
+
+  .sectionTitle {
+    padding: 5%;
+  }
+
+  .actions button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .studentEmailBox input {
+    max-width: 100%;
+    width: 100%;
   }
 }
