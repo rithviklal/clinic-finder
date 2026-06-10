@@ -8,9 +8,12 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
   throw new Error('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY.');
 }
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-
-const WAIT_MS_BETWEEN_REQUESTS = 1500;
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+  auth: {
+    persistSession: false,
+    autoRefreshToken: false,
+  },
+});
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -39,7 +42,139 @@ function includesAny(text, patterns) {
   return patterns.some((pattern) => text.includes(pattern));
 }
 
+function parseDateText(value) {
+  if (!value) return null;
+
+  const cleaned = value.replace(/,/g, '').replace(/\s+/g, ' ').trim();
+  const parsed = new Date(cleaned);
+
+  if (Number.isNaN(parsed.getTime())) return null;
+
+  return parsed.toISOString().slice(0, 10);
+}
+
+function extractDates(text) {
+  const results = {
+    application_start_date: null,
+    application_end_date: null,
+    program_start_date: null,
+    program_end_date: null,
+  };
+
+  const datePattern =
+    '([a-z]+\\s+\\d{1,2},?\\s+\\d{4}|\\d{1,2}\\/\\d{1,2}\\/\\d{2,4})';
+
+  const patterns = [
+    {
+      key: 'application_start_date',
+      regex: new RegExp(
+        `applications?\\s+(open|opens|begin|begins|start|starts)\\s*(on)?\\s*${datePattern}`,
+        'i'
+      ),
+    },
+    {
+      key: 'application_end_date',
+      regex: new RegExp(
+        `applications?\\s+(close|closes|end|ends|due)\\s*(on|by)?\\s*${datePattern}`,
+        'i'
+      ),
+    },
+    {
+      key: 'application_end_date',
+      regex: new RegExp(`deadline\\s*(is|:)?\\s*${datePattern}`, 'i'),
+    },
+    {
+      key: 'application_end_date',
+      regex: new RegExp(`apply\\s+by\\s*${datePattern}`, 'i'),
+    },
+    {
+      key: 'program_start_date',
+      regex: new RegExp(
+        `program\\s+(starts|begins|start date|begin date)\\s*(on)?\\s*${datePattern}`,
+        'i'
+      ),
+    },
+    {
+      key: 'program_end_date',
+      regex: new RegExp(
+        `program\\s+(ends|end date)\\s*(on)?\\s*${datePattern}`,
+        'i'
+      ),
+    },
+  ];
+
+  for (const item of patterns) {
+    const match = text.match(item.regex);
+
+    if (match) {
+      const rawDate = match[match.length - 1];
+      const parsed = parseDateText(rawDate);
+
+      if (parsed && !results[item.key]) {
+        results[item.key] = parsed;
+      }
+    }
+  }
+
+  return results;
+}
+
+function determineDateStatus(dates) {
+  const today = new Date();
+  const todayOnly = new Date(today.toISOString().slice(0, 10));
+
+  if (dates.application_start_date) {
+    const start = new Date(dates.application_start_date);
+
+    if (todayOnly < start) {
+      return {
+        date_status: 'not_open_yet',
+        availability_status: 'limited',
+        summary: `Applications open on ${dates.application_start_date}.`,
+      };
+    }
+  }
+
+  if (dates.application_end_date) {
+    const end = new Date(dates.application_end_date);
+
+    if (todayOnly > end) {
+      return {
+        date_status: 'closed_by_date',
+        availability_status: 'closed',
+        summary: `Application deadline passed on ${dates.application_end_date}.`,
+      };
+    }
+  }
+
+  if (dates.program_end_date) {
+    const programEnd = new Date(dates.program_end_date);
+
+    if (todayOnly > programEnd) {
+      return {
+        date_status: 'program_ended',
+        availability_status: 'closed',
+        summary: `Program ended on ${dates.program_end_date}.`,
+      };
+    }
+  }
+
+  return {
+    date_status: 'date_ok',
+    availability_status: null,
+    summary: null,
+  };
+}
+
 function detectAvailability(text, category) {
+  const waitlistPatterns = [
+    'waitlist only',
+    'join the waitlist',
+    'waiting list',
+    'wait list',
+    'waitlisted',
+  ];
+
   const closedPatterns = [
     'applications are closed',
     'application is closed',
@@ -50,16 +185,12 @@ function detectAvailability(text, category) {
     'registration closed',
     'no longer accepting applications',
     'not accepting applications',
-    'not currently accepting applications',
-    'we are not accepting applications',
     'deadline has passed',
-    'past deadline',
   ];
 
   const unavailablePatterns = [
     'not accepting volunteers',
     'currently not accepting volunteers',
-    'not currently accepting volunteers',
     'volunteer opportunities are not available',
     'volunteering is not available',
     'no volunteer opportunities',
@@ -72,29 +203,16 @@ function detectAvailability(text, category) {
     'currently unavailable',
     'not available at this time',
     'capacity has been reached',
-    'full at this time',
-  ];
-
-  const waitlistPatterns = [
-    'waitlist only',
-    'join the waitlist',
-    'waiting list',
-    'wait list',
-    'waitlisted',
   ];
 
   const limitedPatterns = [
     'limited availability',
     'space is limited',
     'limited spots',
-    'limited number of spots',
     'limited openings',
-    'limited opportunities',
     'selected applicants',
     'competitive application',
     'availability varies',
-    'program availability varies',
-    'department availability varies',
     'seasonal',
     'summer program',
     'summer internship',
@@ -105,7 +223,6 @@ function detectAvailability(text, category) {
     'volunteer application',
     'apply today',
     'applications open',
-    'now accepting applications',
     'accepting applications',
     'volunteer opportunities',
     'shadowing',
@@ -115,64 +232,29 @@ function detectAvailability(text, category) {
   ];
 
   if (includesAny(text, waitlistPatterns)) {
-    return {
-      status: 'waitlist',
-      summary: 'Page indicates waitlist or waiting-list availability.',
-    };
+    return { status: 'waitlist', summary: 'Page indicates waitlist or waiting-list availability.' };
   }
 
   if (includesAny(text, closedPatterns)) {
-    return {
-      status: 'closed',
-      summary: 'Page indicates applications or registration are closed.',
-    };
+    return { status: 'closed', summary: 'Page indicates applications or registration are closed.' };
   }
 
   if (includesAny(text, unavailablePatterns)) {
-    return {
-      status: 'unavailable',
-      summary: 'Page indicates the opportunity is not currently available.',
-    };
+    return { status: 'unavailable', summary: 'Page indicates the opportunity is not currently available.' };
   }
 
   if (includesAny(text, limitedPatterns)) {
-    return {
-      status: 'limited',
-      summary: 'Page indicates limited, seasonal, selective, or variable availability.',
-    };
+    return { status: 'limited', summary: 'Page indicates limited, seasonal, selective, or variable availability.' };
   }
 
   if (includesAny(text, availablePatterns)) {
-    return {
-      status: 'available',
-      summary: 'Page contains active application, volunteer, shadowing, or research language.',
-    };
+    return { status: 'available', summary: 'Page contains active application, volunteer, shadowing, or research language.' };
   }
 
   return {
     status: 'limited',
     summary: `No clear availability language found for ${category || 'opportunity'}; marked limited pending review.`,
   };
-}
-
-function extractDeadline(text) {
-  const patterns = [
-    /deadline\s*(is|:)?\s*([a-z]+\s+\d{1,2},?\s+\d{4})/i,
-    /applications?\s+due\s*(by|:)?\s*([a-z]+\s+\d{1,2},?\s+\d{4})/i,
-    /apply\s+by\s*([a-z]+\s+\d{1,2},?\s+\d{4})/i,
-    /deadline\s*(is|:)?\s*(\d{1,2}\/\d{1,2}\/\d{2,4})/i,
-    /applications?\s+due\s*(by|:)?\s*(\d{1,2}\/\d{1,2}\/\d{2,4})/i,
-    /apply\s+by\s*(\d{1,2}\/\d{1,2}\/\d{2,4})/i,
-  ];
-
-  for (const pattern of patterns) {
-    const match = text.match(pattern);
-    if (match) {
-      return match[match.length - 1];
-    }
-  }
-
-  return null;
 }
 
 function extractRequirementSummary(text) {
@@ -216,22 +298,15 @@ function extractRequirementSummary(text) {
 
 async function fetchPageText(url) {
   if (!url) {
-    return {
-      ok: false,
-      status: null,
-      text: '',
-      note: 'No URL available',
-    };
+    return { ok: false, status: null, text: '', note: 'No URL available' };
   }
 
   try {
     const response = await fetch(url, {
       redirect: 'follow',
       headers: {
-        'User-Agent':
-          'OpenvolBot/1.0 (+https://theworldsavers.org) student healthcare opportunity verifier',
-        Accept:
-          'text/html,application/xhtml+xml,application/xml;q=0.9,text/plain;q=0.8,*/*;q=0.7',
+        'User-Agent': 'OpenvolBot/1.0 student healthcare opportunity verifier',
+        Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,text/plain;q=0.8,*/*;q=0.7',
       },
     });
 
@@ -244,12 +319,7 @@ async function fetchPageText(url) {
       note: `HTTP ${response.status}`,
     };
   } catch (error) {
-    return {
-      ok: false,
-      status: null,
-      text: '',
-      note: error.message,
-    };
+    return { ok: false, status: null, text: '', note: error.message };
   }
 }
 
@@ -291,39 +361,48 @@ async function updateOpportunity(opportunity) {
   const hasPageChanged = oldHash && oldHash !== newHash;
 
   const availability = detectAvailability(page.text, opportunity.opportunity_category);
-  const deadline = extractDeadline(page.text);
+  const detectedDates = extractDates(page.text);
+  const dateCheck = determineDateStatus(detectedDates);
   const requirementSummary = extractRequirementSummary(page.text);
 
+  const finalAvailabilityStatus = dateCheck.availability_status || availability.status;
+  const finalSummary = dateCheck.summary || availability.summary;
+
   const updates = {
-    availability_status: availability.status,
+    availability_status: finalAvailabilityStatus,
     last_verified: new Date().toISOString(),
     source_hash: newHash,
-    last_change_summary: availability.summary,
+    date_status: dateCheck.date_status,
+    last_change_summary: hasPageChanged
+      ? `${finalSummary} Page content changed since last check.`
+      : finalSummary,
   };
 
-  if (deadline) {
-    updates.application_deadline = deadline;
+  if (requirementSummary) updates.requirements = requirementSummary;
+  if (detectedDates.application_start_date) updates.application_start_date = detectedDates.application_start_date;
+
+  if (detectedDates.application_end_date) {
+    updates.application_end_date = detectedDates.application_end_date;
+    updates.application_deadline = detectedDates.application_end_date;
   }
 
-  if (requirementSummary) {
-    updates.requirements = requirementSummary;
-  }
-
-  if (hasPageChanged) {
-    updates.last_change_summary = `${availability.summary} Page content changed since last check.`;
-  }
+  if (detectedDates.program_start_date) updates.program_start_date = detectedDates.program_start_date;
+  if (detectedDates.program_end_date) updates.program_end_date = detectedDates.program_end_date;
 
   await supabase.from('opportunities').update(updates).eq('id', opportunity.id);
 
   console.log(
-    `${hasPageChanged ? 'UPDATED' : 'CHECKED'} - ${opportunity.organization_name} / ${
-      opportunity.opportunity_name
-    } -> ${availability.status}`
+    `${hasPageChanged ? 'UPDATED' : 'CHECKED'} - ${opportunity.organization_name} / ${opportunity.opportunity_name} -> ${finalAvailabilityStatus}`
   );
 }
 
 async function main() {
-  console.log('Starting Openvol opportunity verification...');
+  console.log('================================');
+  console.log('OPENVOL OPPORTUNITY CHECK STARTED');
+  console.log(new Date().toISOString());
+  console.log('SUPABASE URL:', SUPABASE_URL ? 'FOUND' : 'MISSING');
+  console.log('SERVICE KEY:', SUPABASE_SERVICE_ROLE_KEY ? 'FOUND' : 'MISSING');
+  console.log('================================');
 
   const { data: opportunities, error } = await supabase
     .from('opportunities')
@@ -331,9 +410,7 @@ async function main() {
     .eq('active_status', true)
     .order('organization_name');
 
-  if (error) {
-    throw error;
-  }
+  if (error) throw error;
 
   if (!opportunities || opportunities.length === 0) {
     console.log('No active opportunities found.');
@@ -342,7 +419,7 @@ async function main() {
 
   for (const opportunity of opportunities) {
     await updateOpportunity(opportunity);
-    await sleep(WAIT_MS_BETWEEN_REQUESTS);
+    await sleep(1500);
   }
 
   console.log(`Finished checking ${opportunities.length} opportunities.`);
