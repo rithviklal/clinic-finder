@@ -9,7 +9,6 @@ import {
   Globe2,
   Lock,
   Bookmark,
-  ClipboardList,
 } from 'lucide-react';
 
 import { Bar, Doughnut } from 'react-chartjs-2';
@@ -33,18 +32,11 @@ function Header({ setRoute, route }) {
   return (
     <header className="header">
       <div className="brand" onClick={() => setRoute('home')}>
-        <img
-          src="/openvol-logo.png"
-          alt="Openvol"
-          className="siteLogo"
-        />
+        <img src="/openvol-logo.png" alt="Openvol" className="siteLogo" />
       </div>
 
       <nav>
-        <button
-          className={route === 'home' ? 'active' : ''}
-          onClick={() => setRoute('home')}
-        >
+        <button className={route === 'home' ? 'active' : ''} onClick={() => setRoute('home')}>
           Clinics
         </button>
 
@@ -78,8 +70,8 @@ function Hero() {
         <h1>Find clinic volunteering opportunities across Greater Atlanta.</h1>
 
         <p>
-          Search community clinics, free clinics, shadowing pathways, research programs,
-          and outreach organizations that welcome students interested in healthcare service.
+          Search community clinics, free clinics, shadowing pathways, research programs, and
+          outreach organizations that welcome students interested in healthcare service.
         </p>
 
         <div className="heroStats">
@@ -159,9 +151,7 @@ async function getOrCreateStudent(email) {
     .eq('email', cleanEmail)
     .maybeSingle();
 
-  if (existing) {
-    return existing;
-  }
+  if (existing) return existing;
 
   const { data, error } = await supabase
     .from('student_profiles')
@@ -180,6 +170,30 @@ async function getOrCreateStudent(email) {
   }
 
   return data;
+}
+
+function StudentEmailBox({ studentEmail, setStudentEmail }) {
+  return (
+    <section className="missionBanner">
+      <div className="studentEmailBox">
+        <b>Save opportunities to your tracker:</b>
+
+        <input
+          style={{ maxWidth: '320px', marginLeft: '10px' }}
+          type="email"
+          placeholder="Enter your email"
+          value={studentEmail}
+          onChange={(event) => setStudentEmail(event.target.value)}
+        />
+
+        <p className="privacyNotice">
+          Openvol uses your email address solely to save clinics, shadowing opportunities,
+          research opportunities, and application tracking information. Student data is never sold,
+          shared, or distributed to third parties.
+        </p>
+      </div>
+    </section>
+  );
 }
 
 function ClinicCard({ clinic, studentEmail }) {
@@ -235,10 +249,7 @@ function ClinicCard({ clinic, studentEmail }) {
       <div className="cardBody">
         <div className="cardTop">
           <h3>{clinic.clinic_name}</h3>
-
-          <span className="ageBadge">
-            {clinic.minimum_age ? `${clinic.minimum_age}+` : 'Ask'}
-          </span>
+          <span className="ageBadge">{clinic.minimum_age ? `${clinic.minimum_age}+` : 'Ask'}</span>
         </div>
 
         {clinic.availability_status === 'available' && (
@@ -267,7 +278,9 @@ function ClinicCard({ clinic, studentEmail }) {
         <div className="tags">
           {clinic.volunteer_type ? (
             clinic.volunteer_type.split(',').map((tag) => (
-              <span key={tag.trim()}>{tag.trim()}</span>
+              <span key={tag.trim()}>
+                {tag.trim()}
+              </span>
             ))
           ) : (
             <span>Volunteer Opportunity</span>
@@ -383,14 +396,18 @@ function OpportunityCard({ opportunity, studentEmail }) {
           {opportunity.application_url && (
             <button
               className="primary"
-              onClick={() => window.open(opportunity.application_url, '_blank', 'noopener,noreferrer')}
+              onClick={() =>
+                window.open(opportunity.application_url, '_blank', 'noopener,noreferrer')
+              }
             >
               Apply / Learn More <ExternalLink size={15} />
             </button>
           )}
 
           {opportunity.website_url && (
-            <button onClick={() => window.open(opportunity.website_url, '_blank', 'noopener,noreferrer')}>
+            <button
+              onClick={() => window.open(opportunity.website_url, '_blank', 'noopener,noreferrer')}
+            >
               Website
             </button>
           )}
@@ -400,27 +417,69 @@ function OpportunityCard({ opportunity, studentEmail }) {
   );
 }
 
-function StudentEmailBox({ studentEmail, setStudentEmail }) {
+function FeedbackSection() {
+  const [rating, setRating] = useState(0);
+  const [comments, setComments] = useState('');
+  const [submitted, setSubmitted] = useState(false);
+
+  async function submitFeedback() {
+    if (!rating) {
+      alert('Please select a rating.');
+      return;
+    }
+
+    const { error } = await supabase.from('website_feedback').insert({
+      rating,
+      comments,
+    });
+
+    if (error) {
+      console.error(error);
+      alert('Unable to submit feedback.');
+      return;
+    }
+
+    setSubmitted(true);
+  }
+
+  if (submitted) {
+    return (
+      <section className="feedbackSection">
+        <h3>Thank You!</h3>
+        <p>Your feedback helps improve Openvol.</p>
+      </section>
+    );
+  }
+
   return (
-    <section className="missionBanner">
-      <div className="studentEmailBox">
-        <b>Save opportunities to your tracker:</b>
+    <section className="feedbackSection">
+      <h3>Rate Your Experience</h3>
 
-        <input
-          style={{ maxWidth: '320px', marginLeft: '10px' }}
-          type="email"
-          placeholder="Enter your email"
-          value={studentEmail}
-          onChange={(event) => setStudentEmail(event.target.value)}
-        />
+      <p>
+        How helpful was Openvol in finding volunteering, shadowing, or research opportunities?
+      </p>
 
-        <p className="privacyNotice">
-          Openvol uses your email address solely to save clinics,
-          shadowing opportunities, research opportunities, and
-          application tracking information. Student data is never
-          sold, shared, or distributed to third parties.
-        </p>
+      <div className="ratingButtons">
+        {[1, 2, 3, 4, 5].map((num) => (
+          <button
+            key={num}
+            className={rating === num ? 'ratingActive' : ''}
+            onClick={() => setRating(num)}
+          >
+            ⭐ {num}
+          </button>
+        ))}
       </div>
+
+      <textarea
+        placeholder="Optional comments or suggestions..."
+        value={comments}
+        onChange={(event) => setComments(event.target.value)}
+      />
+
+      <button className="primary" onClick={submitFeedback}>
+        Submit Feedback
+      </button>
     </section>
   );
 }
@@ -447,9 +506,7 @@ function Home({ studentEmail, setStudentEmail }) {
       .eq('active_status', true)
       .order('clinic_name');
 
-    if (error) {
-      console.error('Error loading clinics:', error);
-    }
+    if (error) console.error('Error loading clinics:', error);
 
     setClinics(data || []);
     setLoading(false);
@@ -567,8 +624,8 @@ function Home({ studentEmail, setStudentEmail }) {
       </section>
 
       <div className="missionBanner">
-        Helping students discover healthcare volunteering, shadowing, community outreach,
-        and service-learning opportunities throughout Georgia.
+        Helping students discover healthcare volunteering, shadowing, community outreach, and
+        service-learning opportunities throughout Georgia.
       </div>
 
       <section className="sectionTitle">
@@ -603,7 +660,7 @@ function Home({ studentEmail, setStudentEmail }) {
       </div>
 
       <FeedbackSection />
-      
+
       <section className="impact">
         <div>
           <Users />
@@ -647,9 +704,7 @@ function Opportunities({ studentEmail, setStudentEmail }) {
       .eq('active_status', true)
       .order('organization_name');
 
-    if (error) {
-      console.error(error);
-    }
+    if (error) console.error(error);
 
     setOpportunities(data || []);
   }
@@ -753,9 +808,7 @@ function Tracker({ studentEmail, setStudentEmail }) {
   const [savedOpportunities, setSavedOpportunities] = useState([]);
 
   useEffect(() => {
-    if (studentEmail) {
-      loadTracker();
-    }
+    if (studentEmail) loadTracker();
   }, [studentEmail]);
 
   async function loadTracker() {
@@ -885,9 +938,7 @@ function Tracker({ studentEmail, setStudentEmail }) {
                     <td>
                       <select
                         value={item.application_status}
-                        onChange={(event) =>
-                          updateOpportunityStatus(item.id, event.target.value)
-                        }
+                        onChange={(event) => updateOpportunityStatus(item.id, event.target.value)}
                       >
                         {statuses.map((status) => (
                           <option key={status}>{status}</option>
@@ -928,9 +979,7 @@ function Admin() {
   const adminPass = import.meta.env.VITE_ADMIN_PASSCODE || 'admin';
 
   useEffect(() => {
-    if (ok) {
-      loadMetrics();
-    }
+    if (ok) loadMetrics();
   }, [ok]);
 
   function login() {
@@ -949,12 +998,14 @@ function Admin() {
       { data: clicks },
       { data: clinics },
       { data: searches },
+      { data: feedback },
     ] = await Promise.all([
       supabase.from('visitors').select('*'),
       supabase.from('page_views').select('*'),
       supabase.from('clinic_link_clicks').select('*, clinics(clinic_name, city)'),
       supabase.from('clinics').select('*'),
       supabase.from('search_events').select('*'),
+      supabase.from('website_feedback').select('*'),
     ]);
 
     setMetrics({
@@ -963,6 +1014,7 @@ function Admin() {
       clicks: clicks || [],
       clinics: clinics || [],
       searches: searches || [],
+      feedback: feedback || [],
     });
   }
 
@@ -989,9 +1041,15 @@ function Admin() {
     );
   }
 
-  if (!metrics) {
-    return <p className="loading">Loading metrics...</p>;
-  }
+  if (!metrics) return <p className="loading">Loading metrics...</p>;
+
+  const avgRating =
+    metrics.feedback.length > 0
+      ? (
+          metrics.feedback.reduce((sum, item) => sum + Number(item.rating || 0), 0) /
+          metrics.feedback.length
+        ).toFixed(1)
+      : '0';
 
   const clicksByClinic = metrics.clicks.reduce((result, click) => {
     const clinicName = click.clinics?.clinic_name || 'Unknown';
@@ -1055,6 +1113,16 @@ function Admin() {
           <b>{metrics.searches.length}</b>
           <span>Search Events</span>
         </div>
+
+        <div>
+          <b>{metrics.feedback.length}</b>
+          <span>Feedback Responses</span>
+        </div>
+
+        <div>
+          <b>{avgRating} ⭐</b>
+          <span>Average Rating</span>
+        </div>
       </section>
 
       <section className="charts">
@@ -1067,6 +1135,33 @@ function Admin() {
           <h3>Clicks by Device</h3>
           <Doughnut data={donutData} />
         </div>
+      </section>
+
+      <section className="tableCard">
+        <h3>Recent Website Feedback</h3>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Rating</th>
+              <th>Comments</th>
+              <th>Submitted</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {metrics.feedback
+              .slice(-10)
+              .reverse()
+              .map((item) => (
+                <tr key={item.id}>
+                  <td>{item.rating} ⭐</td>
+                  <td>{item.comments || 'No comments'}</td>
+                  <td>{new Date(item.created_at).toLocaleString()}</td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
       </section>
 
       <section className="tableCard">
@@ -1103,82 +1198,15 @@ function Admin() {
   );
 }
 
-function FeedbackSection() {
-  const [rating, setRating] = useState(0);
-  const [comments, setComments] = useState('');
-  const [submitted, setSubmitted] = useState(false);
-
-  async function submitFeedback() {
-    if (!rating) {
-      alert('Please select a rating.');
-      return;
-    }
-
-    const { error } = await supabase
-      .from('website_feedback')
-      .insert({
-        rating,
-        comments
-      });
-
-    if (error) {
-      console.error(error);
-      alert('Unable to submit feedback.');
-      return;
-    }
-
-    setSubmitted(true);
-  }
-
-  if (submitted) {
-    return (
-      <section className="feedbackSection">
-        <h3>Thank You!</h3>
-        <p>Your feedback helps improve Openvol.</p>
-      </section>
-    );
-  }
-
-  return (
-    <section className="feedbackSection">
-      <h3>Rate Your Experience</h3>
-
-      <p>
-        How helpful was Openvol in finding volunteering,
-        shadowing, or research opportunities?
-      </p>
-
-      <div className="ratingButtons">
-        {[1,2,3,4,5].map(num => (
-          <button
-            key={num}
-            className={rating === num ? 'ratingActive' : ''}
-            onClick={() => setRating(num)}
-          >
-            ⭐ {num}
-          </button>
-        ))}
-      </div>
-
-      <textarea
-        placeholder="Optional comments or suggestions..."
-        value={comments}
-        onChange={(e) => setComments(e.target.value)}
-      />
-
-      <button
-        className="primary"
-        onClick={submitFeedback}
-      >
-        Submit Feedback
-      </button>
-    </section>
-  );
-}
-
 function App() {
   const [route, setRoute] = useState(
-    location.pathname.startsWith('/admin') ? 'admin' : 'home'
+    location.pathname.startsWith('/admin')
+      ? 'admin'
+      : location.pathname.startsWith('/opportunities')
+        ? 'opportunities'
+        : location.pathname.startsWith('/tracker')
+          ? 'tracker'
+          : 'home'
   );
 
   const [studentEmail, setStudentEmail] = useState(
@@ -1209,7 +1237,6 @@ function App() {
 
       <footer>
         <div>© {new Date().getFullYear()} Openvol</div>
-
         <div>Student-led healthcare volunteering directory for Greater Atlanta.</div>
 
         <button className="adminLink" onClick={() => setRoute('admin')}>
