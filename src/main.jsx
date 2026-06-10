@@ -602,6 +602,8 @@ function Home({ studentEmail, setStudentEmail }) {
         and eligibility directly with each organization.
       </div>
 
+      <FeedbackSection />
+      
       <section className="impact">
         <div>
           <Users />
