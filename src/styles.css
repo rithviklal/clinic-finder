@@ -696,3 +696,166 @@ nav button.active {
     padding: 10px 5%;
   }
 }
+
+/* ==========================================================
+   FINAL CLEAN OVERRIDES - OPENVOL
+   ========================================================== */
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 7%;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid #e5eef8;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.siteLogo {
+  width: 220px;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+nav {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+nav button.active {
+  background: linear-gradient(135deg, #0ea5e9, #14b8a6);
+  color: white;
+}
+
+.studentEmailBox {
+  width: 100%;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.studentEmailBox input {
+  max-width: 320px;
+  margin: 12px auto 0 !important;
+}
+
+.privacyNotice {
+  text-align: center;
+  margin: 10px auto 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #64748b;
+  max-width: 700px;
+}
+
+.privacyNotice::before {
+  content: "🔒 ";
+}
+
+.adminSummaryGrid {
+  padding: 20px 7%;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+}
+
+.adminSummaryGrid div {
+  background: linear-gradient(135deg, #0f2337, #164e63);
+  color: white;
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 15px 45px rgba(15, 35, 55, 0.12);
+}
+
+.adminSummaryGrid b {
+  display: block;
+  font-size: 34px;
+  line-height: 1;
+}
+
+.adminSummaryGrid span {
+  display: block;
+  margin-top: 8px;
+  opacity: 0.85;
+  font-size: 14px;
+}
+
+.adminChartsGrid {
+  padding: 10px 7%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+}
+
+.adminChartsGrid .chartCard:nth-child(3) {
+  grid-column: span 2;
+  max-width: 620px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+@media (max-width: 1000px) {
+  .adminSummaryGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .adminChartsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .adminChartsGrid .chartCard:nth-child(3) {
+    grid-column: span 1;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px 5%;
+  }
+
+  .siteLogo {
+    width: 160px;
+  }
+
+  nav {
+    justify-content: center;
+    width: 100%;
+  }
+
+  nav button {
+    font-size: 13px;
+    padding: 10px 14px;
+  }
+
+  .privacyNotice {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 640px) {
+  .adminSummaryGrid {
+    grid-template-columns: 1fr;
+    padding: 20px 5%;
+  }
+
+  .adminChartsGrid {
+    padding: 10px 5%;
+  }
+}
