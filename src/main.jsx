@@ -355,10 +355,69 @@ function OpportunityCard({ opportunity, studentEmail }) {
       <div className="cardBody">
         <div className="cardTop">
           <h3>{opportunity.opportunity_name}</h3>
+
           <span className="ageBadge">
             {opportunity.minimum_age ? `${opportunity.minimum_age}+` : 'Ask'}
           </span>
         </div>
+
+        {opportunity.date_status === 'not_open_yet' && (
+          <div className="limitedBadge">
+            Applications Not Open Yet
+          </div>
+        )}
+
+        {opportunity.date_status === 'closed_by_date' && (
+          <div className="unavailableBadge">
+            Application Deadline Passed
+          </div>
+        )}
+
+        {opportunity.date_status === 'program_ended' && (
+          <div className="unavailableBadge">
+            Program Has Ended
+          </div>
+        )}
+
+        {opportunity.date_status !== 'closed_by_date' &&
+          opportunity.date_status !== 'program_ended' &&
+          opportunity.availability_status === 'available' && (
+            <div className="availableBadge">
+              ✓ Currently Available
+            </div>
+          )}
+
+        {opportunity.date_status !== 'closed_by_date' &&
+          opportunity.date_status !== 'program_ended' &&
+          opportunity.availability_status === 'limited' && (
+            <div className="limitedBadge">
+              ⚠ Limited Availability
+            </div>
+          )}
+
+        {opportunity.availability_status === 'waitlist' && (
+          <div className="limitedBadge">
+            ⏳ Waitlist Only
+          </div>
+        )}
+
+        {opportunity.availability_status === 'closed' && (
+          <div className="unavailableBadge">
+            Application Period Closed
+          </div>
+        )}
+
+        {opportunity.availability_status === 'unavailable' && (
+          <div className="unavailableBadge">
+            Shadowing / Research Not Currently Available
+          </div>
+        )}
+
+        {opportunity.last_verified && (
+          <div className="verifiedDate">
+            Verified: {new Date(opportunity.last_verified).toLocaleDateString()}
+          </div>
+        )}
 
         <div className="tags">
           <span>{opportunity.opportunity_category || 'Opportunity'}</span>
@@ -385,6 +444,12 @@ function OpportunityCard({ opportunity, studentEmail }) {
           </div>
         )}
 
+        {opportunity.application_deadline && (
+          <div className="requirements">
+            <b>Application Deadline:</b> {opportunity.application_deadline}
+          </div>
+        )}
+
         <p>{opportunity.notes}</p>
 
         <div className="actions">
@@ -397,7 +462,11 @@ function OpportunityCard({ opportunity, studentEmail }) {
             <button
               className="primary"
               onClick={() =>
-                window.open(opportunity.application_url, '_blank', 'noopener,noreferrer')
+                window.open(
+                  opportunity.application_url,
+                  '_blank',
+                  'noopener,noreferrer'
+                )
               }
             >
               Apply / Learn More <ExternalLink size={15} />
@@ -406,47 +475,17 @@ function OpportunityCard({ opportunity, studentEmail }) {
 
           {opportunity.website_url && (
             <button
-              onClick={() => window.open(opportunity.website_url, '_blank', 'noopener,noreferrer')}
+              onClick={() =>
+                window.open(
+                  opportunity.website_url,
+                  '_blank',
+                  'noopener,noreferrer'
+                )
+              }
             >
               Website
             </button>
           )}
-
-        {opportunity.availability_status === 'available' && (
-  <div className="availableBadge">
-    ✓ Currently Available
-  </div>
-)}
-
-{opportunity.availability_status === 'limited' && (
-  <div className="limitedBadge">
-    ⚠ Limited Availability
-  </div>
-)}
-
-{opportunity.availability_status === 'waitlist' && (
-  <div className="limitedBadge">
-    ⏳ Waitlist Only
-  </div>
-)}
-
-{opportunity.availability_status === 'closed' && (
-  <div className="unavailableBadge">
-    Application Period Closed
-  </div>
-)}
-
-{opportunity.availability_status === 'unavailable' && (
-  <div className="unavailableBadge">
-    Shadowing / Research Not Currently Available
-  </div>
-)}
-
-          {opportunity.last_verified && (
-  <div className="verifiedDate">
-    Verified: {new Date(opportunity.last_verified).toLocaleDateString()}
-  </div>
-)}
         </div>
       </div>
     </article>
