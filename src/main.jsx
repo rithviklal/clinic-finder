@@ -993,29 +993,38 @@ function Admin() {
 
   async function loadMetrics() {
     const [
-      { data: visitors },
-      { data: views },
-      { data: clicks },
-      { data: clinics },
-      { data: searches },
-      { data: feedback },
-    ] = await Promise.all([
-      supabase.from('visitors').select('*'),
-      supabase.from('page_views').select('*'),
-      supabase.from('clinic_link_clicks').select('*, clinics(clinic_name, city)'),
-      supabase.from('clinics').select('*'),
-      supabase.from('search_events').select('*'),
-      supabase.from('website_feedback').select('*'),
-    ]);
+  { data: visitors },
+  { data: views },
+  { data: clicks },
+  { data: clinics },
+  { data: opportunities },
+  { data: savedClinics },
+  { data: savedOpportunities },
+  { data: searches },
+  { data: feedback },
+] = await Promise.all([
+  supabase.from('visitors').select('*'),
+  supabase.from('page_views').select('*'),
+  supabase.from('clinic_link_clicks').select('*, clinics(clinic_name, city)'),
+  supabase.from('clinics').select('*'),
+  supabase.from('opportunities').select('*'),
+  supabase.from('saved_clinics').select('*'),
+  supabase.from('saved_opportunities').select('*'),
+  supabase.from('search_events').select('*'),
+  supabase.from('website_feedback').select('*'),
+]);
 
     setMetrics({
-      visitors: visitors || [],
-      views: views || [],
-      clicks: clicks || [],
-      clinics: clinics || [],
-      searches: searches || [],
-      feedback: feedback || [],
-    });
+  visitors: visitors || [],
+  views: views || [],
+  clicks: clicks || [],
+  clinics: clinics || [],
+  opportunities: opportunities || [],
+  savedClinics: savedClinics || [],
+  savedOpportunities: savedOpportunities || [],
+  searches: searches || [],
+  feedback: feedback || [],
+});
   }
 
   if (!ok) {
@@ -1119,6 +1128,26 @@ function Admin() {
           <span>Feedback Responses</span>
         </div>
 
+        <div>
+          <b>{metrics.opportunities.length}</b>
+          <span>Shadowing / Research Opportunities</span>
+        </div>
+
+        <div>
+          <b>{metrics.savedOpportunities.length}</b>
+          <span>Saved Shadowing / Research</span>
+        </div>
+
+        <div>
+          <b>{metrics.clicks.length}</b>
+          <span>Clinic Link Clicks</span>
+        </div>
+
+        <div>
+          <b>{metrics.savedClinics.length}</b>
+          <span>Saved Clinics</span>
+        </div>
+        
         <div>
           <b>{avgRating} ⭐</b>
           <span>Average Rating</span>
