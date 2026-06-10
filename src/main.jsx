@@ -266,6 +266,54 @@ function ClinicCard({ clinic, studentEmail }) {
           </div>
         )}
 
+{clinic.date_status === 'not_open_yet' && (
+  <div className="limitedBadge">
+    Applications Not Open Yet
+  </div>
+)}
+
+{clinic.date_status === 'closed_by_date' && (
+  <div className="unavailableBadge">
+    Application Deadline Passed
+  </div>
+)}
+
+{clinic.date_status === 'program_ended' && (
+  <div className="unavailableBadge">
+    Program Has Ended
+  </div>
+)}
+
+{clinic.application_start_date && (
+  <div className="verifiedDate">
+    Opens: {new Date(clinic.application_start_date).toLocaleDateString()}
+  </div>
+)}
+
+{clinic.application_end_date && (
+  <div className="verifiedDate">
+    Deadline: {new Date(clinic.application_end_date).toLocaleDateString()}
+  </div>
+)}
+
+{clinic.program_start_date && (
+  <div className="verifiedDate">
+    Program Starts: {new Date(clinic.program_start_date).toLocaleDateString()}
+  </div>
+)}
+
+{clinic.program_end_date && (
+  <div className="verifiedDate">
+    Program Ends: {new Date(clinic.program_end_date).toLocaleDateString()}
+  </div>
+)}
+
+{clinic.last_verified && (
+  <div className="verifiedDate">
+    Verified: {new Date(clinic.last_verified).toLocaleDateString()}
+  </div>
+)}
+        
         <p className="location">
           <MapPin size={16} />
           {clinic.city}, {clinic.county} County
