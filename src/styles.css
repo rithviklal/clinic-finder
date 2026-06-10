@@ -547,3 +547,51 @@ nav button.active {
     font-size: 11px;
   }
 }
+/* ==========================================================
+   FEEDBACK SECTION
+   ========================================================== */
+
+.feedbackSection {
+  margin: 30px 7%;
+  background: white;
+  border: 1px solid #e5eef8;
+  border-radius: 28px;
+  padding: 30px;
+  box-shadow: 0 15px 50px rgba(15,35,55,.07);
+}
+
+.feedbackSection h3 {
+  margin-top: 0;
+}
+
+.feedbackSection textarea {
+  width: 100%;
+  min-height: 120px;
+  margin-top: 15px;
+  margin-bottom: 15px;
+  border: 1px solid #dbe7f3;
+  border-radius: 16px;
+  padding: 15px;
+  resize: vertical;
+}
+
+.ratingButtons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 20px 0;
+}
+
+.ratingButtons button {
+  min-width: 70px;
+}
+
+.ratingActive {
+  background: linear-gradient(
+    135deg,
+    #0ea5e9,
+    #14b8a6
+  ) !important;
+
+  color: white !important;
+}
