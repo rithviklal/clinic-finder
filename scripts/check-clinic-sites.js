@@ -372,7 +372,11 @@ async function checkClinic(clinic) {
       : finalSummary,
   };
 
-  if (requirementSummary) updates.requirements = requirementSummary;
+  // Do not overwrite requirements with scraped lowercase text.
+// Keep manually entered requirements clean and readable.
+// if (requirementSummary) {
+//   updates.requirements = requirementSummary;
+// }
   if (detectedDates.application_start_date) updates.application_start_date = detectedDates.application_start_date;
 
   if (detectedDates.application_end_date) {
