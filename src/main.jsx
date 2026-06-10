@@ -993,38 +993,38 @@ function Admin() {
 
   async function loadMetrics() {
     const [
-  { data: visitors },
-  { data: views },
-  { data: clicks },
-  { data: clinics },
-  { data: opportunities },
-  { data: savedClinics },
-  { data: savedOpportunities },
-  { data: searches },
-  { data: feedback },
-] = await Promise.all([
-  supabase.from('visitors').select('*'),
-  supabase.from('page_views').select('*'),
-  supabase.from('clinic_link_clicks').select('*, clinics(clinic_name, city)'),
-  supabase.from('clinics').select('*'),
-  supabase.from('opportunities').select('*'),
-  supabase.from('saved_clinics').select('*'),
-  supabase.from('saved_opportunities').select('*'),
-  supabase.from('search_events').select('*'),
-  supabase.from('website_feedback').select('*'),
-]);
+      { data: visitors },
+      { data: views },
+      { data: clicks },
+      { data: clinics },
+      { data: opportunities },
+      { data: savedClinics },
+      { data: savedOpportunities },
+      { data: searches },
+      { data: feedback },
+    ] = await Promise.all([
+      supabase.from('visitors').select('*'),
+      supabase.from('page_views').select('*'),
+      supabase.from('clinic_link_clicks').select('*, clinics(clinic_name, city)'),
+      supabase.from('clinics').select('*'),
+      supabase.from('opportunities').select('*'),
+      supabase.from('saved_clinics').select('*'),
+      supabase.from('saved_opportunities').select('*'),
+      supabase.from('search_events').select('*'),
+      supabase.from('website_feedback').select('*'),
+    ]);
 
     setMetrics({
-  visitors: visitors || [],
-  views: views || [],
-  clicks: clicks || [],
-  clinics: clinics || [],
-  opportunities: opportunities || [],
-  savedClinics: savedClinics || [],
-  savedOpportunities: savedOpportunities || [],
-  searches: searches || [],
-  feedback: feedback || [],
-});
+      visitors: visitors || [],
+      views: views || [],
+      clicks: clicks || [],
+      clinics: clinics || [],
+      opportunities: opportunities || [],
+      savedClinics: savedClinics || [],
+      savedOpportunities: savedOpportunities || [],
+      searches: searches || [],
+      feedback: feedback || [],
+    });
   }
 
   if (!ok) {
@@ -1033,7 +1033,7 @@ function Admin() {
         <div>
           <Lock />
           <h1>Admin Metrics</h1>
-          <p>Enter the owner passcode to view anonymous project metrics.</p>
+          <p>Enter the owner passcode to view project metrics.</p>
 
           <input
             type="password"
@@ -1066,14 +1066,32 @@ function Admin() {
     return result;
   }, {});
 
-  const topClinicLabels = Object.keys(clicksByClinic).slice(0, 8);
+  const topClinicLabels = Object.keys(clicksByClinic).slice(0, 10);
 
-  const barData = {
+  const clinicBarData = {
     labels: topClinicLabels,
     datasets: [
       {
-        label: 'Clicks',
+        label: 'Clinic link clicks',
         data: topClinicLabels.map((label) => clicksByClinic[label]),
+      },
+    ],
+  };
+
+  const opportunityCategoryCounts = metrics.opportunities.reduce((result, item) => {
+    const category = item.opportunity_category || 'Other';
+    result[category] = (result[category] || 0) + 1;
+    return result;
+  }, {});
+
+  const opportunityLabels = Object.keys(opportunityCategoryCounts);
+
+  const opportunityBarData = {
+    labels: opportunityLabels,
+    datasets: [
+      {
+        label: 'Shadowing / research opportunities',
+        data: opportunityLabels.map((label) => opportunityCategoryCounts[label]),
       },
     ],
   };
@@ -1084,7 +1102,7 @@ function Admin() {
     return result;
   }, {});
 
-  const donutData = {
+  const devicePieData = {
     labels: Object.keys(deviceCounts),
     datasets: [
       {
@@ -1097,12 +1115,12 @@ function Admin() {
     <main className="admin">
       <section className="sectionTitle">
         <h1>Admin Dashboard</h1>
-        <p>Anonymous engagement metrics</p>
+        <p>Openvol platform metrics</p>
       </section>
 
       <ProjectInfoCard />
 
-      <section className="metricGrid">
+      <section className="adminSummaryGrid">
         <div>
           <b>{metrics.visitors.length}</b>
           <span>Unique Visitors</span>
@@ -1114,28 +1132,13 @@ function Admin() {
         </div>
 
         <div>
-          <b>{metrics.clicks.length}</b>
-          <span>Clinic Link Clicks</span>
-        </div>
-
-        <div>
-          <b>{metrics.searches.length}</b>
-          <span>Search Events</span>
-        </div>
-
-        <div>
-          <b>{metrics.feedback.length}</b>
-          <span>Feedback Responses</span>
+          <b>{metrics.clinics.length}</b>
+          <span>Clinics Listed</span>
         </div>
 
         <div>
           <b>{metrics.opportunities.length}</b>
-          <span>Shadowing / Research Opportunities</span>
-        </div>
-
-        <div>
-          <b>{metrics.savedOpportunities.length}</b>
-          <span>Saved Shadowing / Research</span>
+          <span>Shadowing / Research</span>
         </div>
 
         <div>
@@ -1147,22 +1150,32 @@ function Admin() {
           <b>{metrics.savedClinics.length}</b>
           <span>Saved Clinics</span>
         </div>
-        
+
+        <div>
+          <b>{metrics.savedOpportunities.length}</b>
+          <span>Saved Opportunities</span>
+        </div>
+
         <div>
           <b>{avgRating} ⭐</b>
           <span>Average Rating</span>
         </div>
       </section>
 
-      <section className="charts">
+      <section className="adminChartsGrid">
         <div className="chartCard">
-          <h3>Clicks by Clinic</h3>
-          <Bar data={barData} />
+          <h3>Top Clinic Link Clicks</h3>
+          <Bar data={clinicBarData} />
         </div>
 
         <div className="chartCard">
-          <h3>Clicks by Device</h3>
-          <Doughnut data={donutData} />
+          <h3>Shadowing & Research by Category</h3>
+          <Bar data={opportunityBarData} />
+        </div>
+
+        <div className="chartCard">
+          <h3>Device Used</h3>
+          <Doughnut data={devicePieData} />
         </div>
       </section>
 
@@ -1192,6 +1205,9 @@ function Admin() {
           </tbody>
         </table>
       </section>
+    </main>
+  );
+}
 
       <section className="tableCard">
         <h3>Recent Clinic Clicks</h3>
