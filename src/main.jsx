@@ -1,3 +1,8 @@
+<header className="worldSaversBanner">
+  <a href="https://theworldsavers.org">
+    ← Back to The World Savers
+  </a>
+</header>
 import React, { useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
