@@ -1357,6 +1357,12 @@ function App() {
 
   return (
     <>
+      <div className="worldSaversBanner">
+        <a href="https://theworldsavers.org">
+          🌎 Back to The World Savers
+        </a>
+      </div>
+
       <Header setRoute={setRoute} route={route} />
 
       {route === 'admin' ? (
@@ -1393,14 +1399,5 @@ function App() {
   );
 }
 
-<div className="worldSaversBanner">
-  <a
-    href="https://theworldsavers.org"
-    target="_blank"
-    rel="noopener noreferrer"
-  >
-    🌎 The World Savers Home
-  </a>
-</div>
 
 createRoot(document.getElementById('root')).render(<App />);
