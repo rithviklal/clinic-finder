@@ -917,3 +917,28 @@ footer {
     width: 100%;
   }
 }
+/* ==========================================
+   THE WORLD SAVERS HEADER BANNER
+========================================== */
+
+.worldSaversBanner {
+  background: linear-gradient(90deg, #082f49, #0f4c75);
+  color: white;
+  text-align: center;
+  padding: 12px 20px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.3px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.worldSaversBanner a {
+  color: white;
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+.worldSaversBanner a:hover {
+  opacity: 0.85;
+  text-decoration: underline;
+}
