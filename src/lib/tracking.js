@@ -77,3 +77,33 @@ export async function trackSearch(filters) {
     minimum_age_filter: filters.minimumAge ? Number(filters.minimumAge) : null
   });
 }
+
+async function getVisitorNetworkInfo() {
+  try {
+    const response = await fetch('/cdn-cgi/trace');
+    const text = await response.text();
+
+    const data = {};
+
+    text.split('\n').forEach((line) => {
+      const [key, value] = line.split('=');
+      if (key && value) data[key] = value;
+    });
+
+    return {
+      ip_address: data.ip || null,
+      country_code: data.loc || null,
+      cloudflare_colo: data.colo || null,
+      user_agent: navigator.userAgent || null,
+    };
+  } catch (error) {
+    console.warn('Unable to capture visitor network info:', error);
+
+    return {
+      ip_address: null,
+      country_code: null,
+      cloudflare_colo: null,
+      user_agent: navigator.userAgent || null,
+    };
+  }
+}
