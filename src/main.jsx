@@ -1398,4 +1398,14 @@ function App() {
   );
 }
 
+<div className="worldSaversBanner">
+  <a
+    href="https://theworldsavers.org"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    🌎 The World Savers Home
+  </a>
+</div>
+
 createRoot(document.getElementById('root')).render(<App />);
