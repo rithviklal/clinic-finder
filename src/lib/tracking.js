@@ -66,6 +66,28 @@ export async function trackClinicClick(clinicId, clickedUrl) {
   });
 }
 
+export async function trackOpportunityClick(opportunityId, clickedUrl) {
+  const visitor = await ensureVisitor();
+
+  if (!visitor) {
+    console.error('OPPORTUNITY CLICK NOT TRACKED: visitor was not created or found.');
+    return;
+  }
+
+  const { error } = await supabase.from('opportunity_link_clicks').insert({
+    visitor_id: visitor.id,
+    opportunity_id: opportunityId,
+    clicked_url: clickedUrl,
+    device_type: deviceType(),
+    browser: parseBrowser(),
+    clicked_at: new Date().toISOString(),
+  });
+
+  if (error) {
+    console.error('OPPORTUNITY CLICK INSERT ERROR:', error);
+  }
+}
+
 export async function trackSearch(filters) {
   const visitor = await ensureVisitor();
   if (!visitor) return;
