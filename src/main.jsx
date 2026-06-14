@@ -28,6 +28,106 @@ import './styles.css';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Tooltip, Legend);
 
+function getAnonymousVisitorId() {
+  const storageKey = 'openvol_anonymous_visitor_id';
+  let visitorId = localStorage.getItem(storageKey);
+
+  if (!visitorId) {
+    visitorId =
+      crypto?.randomUUID?.() ||
+      `visitor-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+    localStorage.setItem(storageKey, visitorId);
+  }
+
+  return visitorId;
+}
+
+function getDeviceType() {
+  const userAgent = navigator.userAgent || '';
+
+  if (/Mobi|Android|iPhone|iPad|iPod/i.test(userAgent)) {
+    return 'Mobile';
+  }
+
+  if (/Tablet|iPad/i.test(userAgent)) {
+    return 'Tablet';
+  }
+
+  return 'Desktop';
+}
+
+function getBrowserName() {
+  const userAgent = navigator.userAgent || '';
+
+  if (userAgent.includes('Edg/')) return 'Edge';
+  if (userAgent.includes('Chrome/')) return 'Chrome';
+  if (userAgent.includes('Safari/') && !userAgent.includes('Chrome/')) return 'Safari';
+  if (userAgent.includes('Firefox/')) return 'Firefox';
+
+  return 'Unknown';
+}
+
+async function ensureVisitorExists() {
+  const anonymousVisitorId = getAnonymousVisitorId();
+
+  const { data: existingVisitor, error: selectError } = await supabase
+    .from('visitors')
+    .select('*')
+    .eq('anonymous_visitor_id', anonymousVisitorId)
+    .maybeSingle();
+
+  if (selectError) {
+    console.error('Visitor lookup failed:', selectError);
+    return anonymousVisitorId;
+  }
+
+  if (existingVisitor) {
+    await supabase
+      .from('visitors')
+      .update({
+        last_seen_at: new Date().toISOString(),
+      })
+      .eq('anonymous_visitor_id', anonymousVisitorId);
+
+    return anonymousVisitorId;
+  }
+
+  const { error: insertError } = await supabase.from('visitors').insert({
+    anonymous_visitor_id: anonymousVisitorId,
+    device_type: getDeviceType(),
+    browser: getBrowserName(),
+    first_seen_at: new Date().toISOString(),
+    last_seen_at: new Date().toISOString(),
+  });
+
+  if (insertError) {
+    console.error('Visitor insert failed:', insertError);
+  }
+
+  return anonymousVisitorId;
+}
+
+async function trackRouteVisit(route) {
+  const anonymousVisitorId = await ensureVisitorExists();
+
+  const pagePath = route === 'home' ? '/' : `/${route}`;
+
+  const { error } = await supabase.from('page_views').insert({
+    anonymous_visitor_id: anonymousVisitorId,
+    page_path: pagePath,
+    device_type: getDeviceType(),
+    browser: getBrowserName(),
+    referrer: document.referrer || null,
+    viewed_at: new Date().toISOString(),
+  });
+
+  if (error) {
+    console.error('Page view insert failed:', error);
+  }
+}
+
+
 function Header({ setRoute, route }) {
   return (
     <header className="header">
@@ -618,7 +718,6 @@ function Home({ studentEmail, setStudentEmail }) {
   });
 
   useEffect(() => {
-    trackPageView('/');
     loadClinics();
   }, []);
 
@@ -816,7 +915,6 @@ function Opportunities({ studentEmail, setStudentEmail }) {
   });
 
   useEffect(() => {
-    trackPageView('/opportunities');
     loadOpportunities();
   }, []);
 
@@ -1353,6 +1451,7 @@ function App() {
 
   useEffect(() => {
     history.replaceState(null, '', route === 'home' ? '/' : `/${route}`);
+    trackRouteVisit(route);
   }, [route]);
 
   return (
