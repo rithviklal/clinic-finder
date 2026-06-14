@@ -1,81 +1,66 @@
 import { supabase } from './supabase';
 
-const VISITOR_KEY = 'worldsavers_visitor_id';
+const VISITOR_ID_KEY = 'openvol_visitor_id';
 
-export function getOrCreateAnonymousId() {
-  let id = localStorage.getItem(VISITOR_KEY);
-  if (!id) {
-    id = crypto.randomUUID();
-    localStorage.setItem(VISITOR_KEY, id);
+function getOrCreateVisitorId() {
+  let visitorId = localStorage.getItem(VISITOR_ID_KEY);
+
+  if (!visitorId) {
+    visitorId =
+      crypto?.randomUUID?.() ||
+      `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+    localStorage.setItem(VISITOR_ID_KEY, visitorId);
   }
-  return id;
+
+  return visitorId;
 }
 
-export function parseBrowser() {
-  const ua = navigator.userAgent;
-  if (ua.includes('Chrome')) return 'Chrome';
-  if (ua.includes('Safari')) return 'Safari';
-  if (ua.includes('Firefox')) return 'Firefox';
-  if (ua.includes('Edge')) return 'Edge';
+function getDeviceType() {
+  const userAgent = navigator.userAgent || '';
+
+  if (/tablet|ipad|playbook|silk/i.test(userAgent)) {
+    return 'Tablet';
+  }
+
+  if (/mobile|iphone|ipod|android|blackberry|opera mini|iemobile/i.test(userAgent)) {
+    return 'Mobile';
+  }
+
+  return 'Desktop';
+}
+
+function getBrowser() {
+  const userAgent = navigator.userAgent || '';
+
+  if (userAgent.includes('Edg/')) return 'Edge';
+  if (userAgent.includes('Chrome/')) return 'Chrome';
+  if (userAgent.includes('Safari/') && !userAgent.includes('Chrome/')) return 'Safari';
+  if (userAgent.includes('Firefox/')) return 'Firefox';
+
   return 'Other';
 }
 
-export function deviceType() {
-  return /Mobi|Android|iPhone/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop';
-}
+function maskIpAddress(ipAddress) {
+  if (!ipAddress) return null;
 
-export async function ensureVisitor() {
-  const anonymousId = getOrCreateAnonymousId();
-  const { data: existing } = await supabase
-    .from('visitors')
-    .select('*')
-    .eq('anonymous_visitor_id', anonymousId)
-    .maybeSingle();
+  if (ipAddress.includes('.')) {
+    const parts = ipAddress.split('.');
 
-  if (existing) {
-    await supabase
-      .from('visitors')
-      .update({ last_visit_at: new Date().toISOString(), visit_count: (existing.visit_count || 0) + 1, user_agent: navigator.userAgent })
-      .eq('id', existing.id);
-    return existing;
+    if (parts.length === 4) {
+      return `${parts[0]}.${parts[1]}.${parts[2]}.xxx`;
+    }
   }
 
-  const { data } = await supabase
-    .from('visitors')
-    .insert({ anonymous_visitor_id: anonymousId, user_agent: navigator.userAgent })
-    .select()
-    .single();
-  return data;
-}
+  if (ipAddress.includes(':')) {
+    const parts = ipAddress.split(':').filter(Boolean);
 
-export async function trackPageView(pageUrl, clinicId = null) {
-  const visitor = await ensureVisitor();
-  if (!visitor) return;
-  await supabase.from('page_views').insert({ visitor_id: visitor.id, page_url: pageUrl, clinic_id: clinicId });
-}
+    if (parts.length >= 3) {
+      return `${parts.slice(0, 3).join(':')}::xxxx`;
+    }
+  }
 
-export async function trackClinicClick(clinicId, clickedUrl) {
-  const visitor = await ensureVisitor();
-  if (!visitor) return;
-  await supabase.from('clinic_link_clicks').insert({
-    visitor_id: visitor.id,
-    clinic_id: clinicId,
-    clicked_url: clickedUrl,
-    device_type: deviceType(),
-    browser: parseBrowser()
-  });
-}
-
-export async function trackSearch(filters) {
-  const visitor = await ensureVisitor();
-  if (!visitor) return;
-  await supabase.from('search_events').insert({
-    visitor_id: visitor.id,
-    search_text: filters.searchText || '',
-    city_filter: filters.city || '',
-    county_filter: filters.county || '',
-    minimum_age_filter: filters.minimumAge ? Number(filters.minimumAge) : null
-  });
+  return ipAddress;
 }
 
 async function getVisitorNetworkInfo() {
@@ -87,11 +72,14 @@ async function getVisitorNetworkInfo() {
 
     text.split('\n').forEach((line) => {
       const [key, value] = line.split('=');
-      if (key && value) data[key] = value;
+
+      if (key && value) {
+        data[key] = value;
+      }
     });
 
     return {
-      ip_address: data.ip || null,
+      ip_address: maskIpAddress(data.ip || null),
       country_code: data.loc || null,
       cloudflare_colo: data.colo || null,
       user_agent: navigator.userAgent || null,
@@ -105,5 +93,85 @@ async function getVisitorNetworkInfo() {
       cloudflare_colo: null,
       user_agent: navigator.userAgent || null,
     };
+  }
+}
+
+export async function trackPageView(pagePath = window.location.pathname) {
+  try {
+    const visitorId = getOrCreateVisitorId();
+    const networkInfo = await getVisitorNetworkInfo();
+
+    await supabase.from('visitors').upsert(
+      {
+        visitor_id: visitorId,
+        device_type: getDeviceType(),
+        browser: getBrowser(),
+        ip_address: networkInfo.ip_address,
+        country_code: networkInfo.country_code,
+        cloudflare_colo: networkInfo.cloudflare_colo,
+        user_agent: networkInfo.user_agent,
+        last_seen_at: new Date().toISOString(),
+      },
+      {
+        onConflict: 'visitor_id',
+      }
+    );
+
+    await supabase.from('page_views').insert({
+      visitor_id: visitorId,
+      page_path: pagePath,
+      device_type: getDeviceType(),
+      browser: getBrowser(),
+      ip_address: networkInfo.ip_address,
+      country_code: networkInfo.country_code,
+      cloudflare_colo: networkInfo.cloudflare_colo,
+      user_agent: networkInfo.user_agent,
+    });
+  } catch (error) {
+    console.warn('Unable to track page view:', error);
+  }
+}
+
+export async function trackClinicClick(clinicId, clickedUrl) {
+  try {
+    const visitorId = getOrCreateVisitorId();
+    const networkInfo = await getVisitorNetworkInfo();
+
+    await supabase.from('clinic_link_clicks').insert({
+      visitor_id: visitorId,
+      clinic_id: clinicId,
+      clicked_url: clickedUrl,
+      device_type: getDeviceType(),
+      browser: getBrowser(),
+      ip_address: networkInfo.ip_address,
+      country_code: networkInfo.country_code,
+      cloudflare_colo: networkInfo.cloudflare_colo,
+      user_agent: networkInfo.user_agent,
+    });
+  } catch (error) {
+    console.warn('Unable to track clinic click:', error);
+  }
+}
+
+export async function trackSearch(filters) {
+  try {
+    const visitorId = getOrCreateVisitorId();
+    const networkInfo = await getVisitorNetworkInfo();
+
+    await supabase.from('search_events').insert({
+      visitor_id: visitorId,
+      search_text: filters?.searchText || '',
+      city: filters?.city || '',
+      county: filters?.county || '',
+      minimum_age: filters?.minimumAge || null,
+      device_type: getDeviceType(),
+      browser: getBrowser(),
+      ip_address: networkInfo.ip_address,
+      country_code: networkInfo.country_code,
+      cloudflare_colo: networkInfo.cloudflare_colo,
+      user_agent: networkInfo.user_agent,
+    });
+  } catch (error) {
+    console.warn('Unable to track search:', error);
   }
 }
