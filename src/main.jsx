@@ -23,110 +23,15 @@ import {
 } from 'chart.js';
 
 import { supabase } from './lib/supabase';
-import { trackPageView, trackClinicClick, trackSearch } from './lib/tracking';
+import {
+  trackPageView,
+  trackClinicClick,
+  trackOpportunityClick,
+  trackSearch,
+} from './lib/tracking';
 import './styles.css';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Tooltip, Legend);
-
-function getAnonymousVisitorId() {
-  const storageKey = 'openvol_anonymous_visitor_id';
-  let visitorId = localStorage.getItem(storageKey);
-
-  if (!visitorId) {
-    visitorId =
-      crypto?.randomUUID?.() ||
-      `visitor-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-
-    localStorage.setItem(storageKey, visitorId);
-  }
-
-  return visitorId;
-}
-
-function getDeviceType() {
-  const userAgent = navigator.userAgent || '';
-
-  if (/Mobi|Android|iPhone|iPad|iPod/i.test(userAgent)) {
-    return 'Mobile';
-  }
-
-  if (/Tablet|iPad/i.test(userAgent)) {
-    return 'Tablet';
-  }
-
-  return 'Desktop';
-}
-
-function getBrowserName() {
-  const userAgent = navigator.userAgent || '';
-
-  if (userAgent.includes('Edg/')) return 'Edge';
-  if (userAgent.includes('Chrome/')) return 'Chrome';
-  if (userAgent.includes('Safari/') && !userAgent.includes('Chrome/')) return 'Safari';
-  if (userAgent.includes('Firefox/')) return 'Firefox';
-
-  return 'Unknown';
-}
-
-async function ensureVisitorExists() {
-  const anonymousVisitorId = getAnonymousVisitorId();
-
-  const { data: existingVisitor, error: selectError } = await supabase
-    .from('visitors')
-    .select('*')
-    .eq('anonymous_visitor_id', anonymousVisitorId)
-    .maybeSingle();
-
-  if (selectError) {
-    console.error('Visitor lookup failed:', selectError);
-    return anonymousVisitorId;
-  }
-
-  if (existingVisitor) {
-    await supabase
-      .from('visitors')
-      .update({
-        last_seen_at: new Date().toISOString(),
-      })
-      .eq('anonymous_visitor_id', anonymousVisitorId);
-
-    return anonymousVisitorId;
-  }
-
-  const { error: insertError } = await supabase.from('visitors').insert({
-    anonymous_visitor_id: anonymousVisitorId,
-    device_type: getDeviceType(),
-    browser: getBrowserName(),
-    first_seen_at: new Date().toISOString(),
-    last_seen_at: new Date().toISOString(),
-  });
-
-  if (insertError) {
-    console.error('Visitor insert failed:', insertError);
-  }
-
-  return anonymousVisitorId;
-}
-
-async function trackRouteVisit(route) {
-  const anonymousVisitorId = await ensureVisitorExists();
-
-  const pagePath = route === 'home' ? '/' : `/${route}`;
-
-  const { error } = await supabase.from('page_views').insert({
-    anonymous_visitor_id: anonymousVisitorId,
-    page_path: pagePath,
-    device_type: getDeviceType(),
-    browser: getBrowserName(),
-    referrer: document.referrer || null,
-    viewed_at: new Date().toISOString(),
-  });
-
-  if (error) {
-    console.error('Page view insert failed:', error);
-  }
-}
-
 
 function Header({ setRoute, route }) {
   return (
@@ -486,6 +391,11 @@ function OpportunityCard({ opportunity, studentEmail }) {
     alert('Opportunity saved to My Tracker.');
   };
 
+  const handleOpportunityClick = async (url) => {
+    await trackOpportunityClick(opportunity.id, url);
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
   return (
     <article className="clinicCard">
       <div className="clinicLogoBox">
@@ -609,13 +519,7 @@ function OpportunityCard({ opportunity, studentEmail }) {
           {opportunity.application_url && (
             <button
               className="primary"
-              onClick={() =>
-                window.open(
-                  opportunity.application_url,
-                  '_blank',
-                  'noopener,noreferrer'
-                )
-              }
+              onClick={() => handleOpportunityClick(opportunity.application_url)}
             >
               Apply / Learn More <ExternalLink size={15} />
             </button>
@@ -623,13 +527,7 @@ function OpportunityCard({ opportunity, studentEmail }) {
 
           {opportunity.website_url && (
             <button
-              onClick={() =>
-                window.open(
-                  opportunity.website_url,
-                  '_blank',
-                  'noopener,noreferrer'
-                )
-              }
+              onClick={() => handleOpportunityClick(opportunity.website_url)}
             >
               Website
             </button>
@@ -718,6 +616,7 @@ function Home({ studentEmail, setStudentEmail }) {
   });
 
   useEffect(() => {
+    trackPageView('/');
     loadClinics();
   }, []);
 
@@ -915,6 +814,7 @@ function Opportunities({ studentEmail, setStudentEmail }) {
   });
 
   useEffect(() => {
+    trackPageView('/opportunities');
     loadOpportunities();
   }, []);
 
@@ -1217,6 +1117,7 @@ function Admin() {
       { data: visitors },
       { data: views },
       { data: clicks },
+      { data: opportunityClicks },
       { data: clinics },
       { data: opportunities },
       { data: savedClinics },
@@ -1227,6 +1128,9 @@ function Admin() {
       supabase.from('visitors').select('*'),
       supabase.from('page_views').select('*'),
       supabase.from('clinic_link_clicks').select('*, clinics(clinic_name, city)'),
+      supabase
+        .from('opportunity_link_clicks')
+        .select('*, opportunities(opportunity_name, organization_name, opportunity_category, city)'),
       supabase.from('clinics').select('*'),
       supabase.from('opportunities').select('*'),
       supabase.from('saved_clinics').select('*'),
@@ -1239,6 +1143,7 @@ function Admin() {
       visitors: visitors || [],
       views: views || [],
       clicks: clicks || [],
+      opportunityClicks: opportunityClicks || [],
       clinics: clinics || [],
       opportunities: opportunities || [],
       savedClinics: savedClinics || [],
@@ -1317,7 +1222,27 @@ function Admin() {
     ],
   };
 
-  const deviceCounts = metrics.clicks.reduce((result, click) => {
+  const clicksByOpportunity = metrics.opportunityClicks.reduce((result, click) => {
+    const opportunityName = click.opportunities?.opportunity_name || 'Unknown';
+    result[opportunityName] = (result[opportunityName] || 0) + 1;
+    return result;
+  }, {});
+
+  const topOpportunityLabels = Object.keys(clicksByOpportunity).slice(0, 10);
+
+  const opportunityClickBarData = {
+    labels: topOpportunityLabels,
+    datasets: [
+      {
+        label: 'Opportunity link clicks',
+        data: topOpportunityLabels.map((label) => clicksByOpportunity[label]),
+      },
+    ],
+  };
+
+  const allClicks = [...metrics.clicks, ...metrics.opportunityClicks];
+
+  const deviceCounts = allClicks.reduce((result, click) => {
     const deviceType = click.device_type || 'Unknown';
     result[deviceType] = (result[deviceType] || 0) + 1;
     return result;
@@ -1368,6 +1293,11 @@ function Admin() {
         </div>
 
         <div>
+          <b>{metrics.opportunityClicks.length}</b>
+          <span>Opportunity Link Clicks</span>
+        </div>
+
+        <div>
           <b>{metrics.savedClinics.length}</b>
           <span>Saved Clinics</span>
         </div>
@@ -1387,6 +1317,11 @@ function Admin() {
         <div className="chartCard">
           <h3>Top Clinic Link Clicks</h3>
           <Bar data={clinicBarData} />
+        </div>
+
+        <div className="chartCard">
+          <h3>Top Shadowing & Research Link Clicks</h3>
+          <Bar data={opportunityClickBarData} />
         </div>
 
         <div className="chartCard">
@@ -1451,7 +1386,6 @@ function App() {
 
   useEffect(() => {
     history.replaceState(null, '', route === 'home' ? '/' : `/${route}`);
-    trackRouteVisit(route);
   }, [route]);
 
   return (
