@@ -1186,6 +1186,40 @@ function Admin() {
         ).toFixed(1)
       : '0';
 
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: {
+      legend: {
+        position: 'top',
+      },
+      tooltip: {
+        enabled: true,
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          precision: 0,
+        },
+      },
+    },
+  };
+
+  const doughnutOptions = {
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: {
+      legend: {
+        position: 'top',
+      },
+      tooltip: {
+        enabled: true,
+      },
+    },
+  };
+
   const clicksByClinic = metrics.clicks.reduce((result, click) => {
     const clinicName = click.clinics?.clinic_name || 'Unknown';
     result[clinicName] = (result[clinicName] || 0) + 1;
@@ -1198,8 +1232,12 @@ function Admin() {
     labels: topClinicLabels,
     datasets: [
       {
-        label: 'Clinic link clicks',
+        label: 'Clinic Link Clicks',
         data: topClinicLabels.map((label) => clicksByClinic[label]),
+        backgroundColor: '#0EA5E9',
+        borderColor: '#0284C7',
+        borderWidth: 1,
+        borderRadius: 6,
       },
     ],
   };
@@ -1216,8 +1254,19 @@ function Admin() {
     labels: opportunityLabels,
     datasets: [
       {
-        label: 'Shadowing / research opportunities',
+        label: 'Shadowing / Research Opportunities',
         data: opportunityLabels.map((label) => opportunityCategoryCounts[label]),
+        backgroundColor: [
+          '#0EA5E9',
+          '#14B8A6',
+          '#8B5CF6',
+          '#F59E0B',
+          '#EF4444',
+          '#22C55E',
+        ],
+        borderColor: '#ffffff',
+        borderWidth: 1,
+        borderRadius: 6,
       },
     ],
   };
@@ -1234,8 +1283,12 @@ function Admin() {
     labels: topOpportunityLabels,
     datasets: [
       {
-        label: 'Opportunity link clicks',
+        label: 'Opportunity Link Clicks',
         data: topOpportunityLabels.map((label) => clicksByOpportunity[label]),
+        backgroundColor: '#14B8A6',
+        borderColor: '#0F766E',
+        borderWidth: 1,
+        borderRadius: 6,
       },
     ],
   };
@@ -1253,6 +1306,16 @@ function Admin() {
     datasets: [
       {
         data: Object.values(deviceCounts),
+        backgroundColor: [
+          '#0EA5E9',
+          '#14B8A6',
+          '#8B5CF6',
+          '#F59E0B',
+          '#EF4444',
+          '#22C55E',
+        ],
+        borderColor: '#ffffff',
+        borderWidth: 2,
       },
     ],
   };
@@ -1316,22 +1379,22 @@ function Admin() {
       <section className="adminChartsGrid">
         <div className="chartCard">
           <h3>Top Clinic Link Clicks</h3>
-          <Bar data={clinicBarData} />
+          <Bar data={clinicBarData} options={chartOptions} />
         </div>
 
         <div className="chartCard">
           <h3>Top Shadowing & Research Link Clicks</h3>
-          <Bar data={opportunityClickBarData} />
+          <Bar data={opportunityClickBarData} options={chartOptions} />
         </div>
 
         <div className="chartCard">
           <h3>Shadowing & Research by Category</h3>
-          <Bar data={opportunityBarData} />
+          <Bar data={opportunityBarData} options={chartOptions} />
         </div>
 
         <div className="chartCard">
           <h3>Device Used</h3>
-          <Doughnut data={devicePieData} />
+          <Doughnut data={devicePieData} options={doughnutOptions} />
         </div>
       </section>
 
