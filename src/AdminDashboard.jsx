@@ -8,7 +8,7 @@ import {
   LineElement, PointElement, Title, Tooltip
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
-import { supabase } from '../lib/supabase';
+import { supabase } from './lib/supabase';
 import './AdminDashboard.css';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
