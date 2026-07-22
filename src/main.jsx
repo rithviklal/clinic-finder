@@ -12,6 +12,9 @@ import {
 } from 'lucide-react';
 
 import { Bar, Doughnut } from 'react-chartjs-2';
+import { MapContainer, TileLayer, Marker, Tooltip as MapTooltip, Popup, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -32,6 +35,375 @@ import {
 import './styles.css';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Tooltip, Legend);
+
+
+const GEORGIA_REGIONS = {
+  all: {
+    label: 'All Georgia Regions',
+    center: [32.72, -83.35],
+    zoom: 7,
+  },
+  atlanta: {
+    label: 'Atlanta Regional Commission',
+    center: [33.75, -84.39],
+    zoom: 9,
+  },
+  mountains: {
+    label: 'Georgia Mountains',
+    center: [34.52, -83.75],
+    zoom: 8,
+  },
+  northwest: {
+    label: 'Northwest Georgia',
+    center: [34.33, -85.02],
+    zoom: 8,
+  },
+  northeast: {
+    label: 'Northeast Georgia',
+    center: [33.95, -83.35],
+    zoom: 8,
+  },
+  threeRivers: {
+    label: 'Three Rivers',
+    center: [33.16, -84.72],
+    zoom: 8,
+  },
+  middleGeorgia: {
+    label: 'Middle Georgia',
+    center: [32.84, -83.63],
+    zoom: 8,
+  },
+  csra: {
+    label: 'Central Savannah River Area',
+    center: [33.36, -82.12],
+    zoom: 8,
+  },
+  riverValley: {
+    label: 'River Valley',
+    center: [32.35, -84.98],
+    zoom: 8,
+  },
+  heartAltamaha: {
+    label: 'Heart of Georgia–Altamaha',
+    center: [32.12, -82.55],
+    zoom: 8,
+  },
+  coastal: {
+    label: 'Coastal Georgia',
+    center: [31.85, -81.25],
+    zoom: 8,
+  },
+  southwest: {
+    label: 'Southwest Georgia',
+    center: [31.45, -84.45],
+    zoom: 8,
+  },
+  southern: {
+    label: 'Southern Georgia',
+    center: [31.15, -82.75],
+    zoom: 8,
+  },
+};
+
+const COUNTY_TO_REGION = {
+  Cherokee: 'atlanta',
+  Clayton: 'atlanta',
+  Cobb: 'atlanta',
+  DeKalb: 'atlanta',
+  Douglas: 'atlanta',
+  Fayette: 'atlanta',
+  Fulton: 'atlanta',
+  Gwinnett: 'atlanta',
+  Henry: 'atlanta',
+  Rockdale: 'atlanta',
+
+  Banks: 'mountains',
+  Dawson: 'mountains',
+  Fannin: 'mountains',
+  Forsyth: 'mountains',
+  Franklin: 'mountains',
+  Gilmer: 'mountains',
+  Habersham: 'mountains',
+  Hall: 'mountains',
+  Hart: 'mountains',
+  Lumpkin: 'mountains',
+  Pickens: 'mountains',
+  Rabun: 'mountains',
+  Stephens: 'mountains',
+  Towns: 'mountains',
+  Union: 'mountains',
+  White: 'mountains',
+
+  Bartow: 'northwest',
+  Catoosa: 'northwest',
+  Chattooga: 'northwest',
+  Dade: 'northwest',
+  Floyd: 'northwest',
+  Gordon: 'northwest',
+  Haralson: 'northwest',
+  Murray: 'northwest',
+  Paulding: 'northwest',
+  Polk: 'northwest',
+  Walker: 'northwest',
+  Whitfield: 'northwest',
+
+  Barrow: 'northeast',
+  Clarke: 'northeast',
+  Elbert: 'northeast',
+  Greene: 'northeast',
+  Jackson: 'northeast',
+  Jasper: 'northeast',
+  Madison: 'northeast',
+  Morgan: 'northeast',
+  Newton: 'northeast',
+  Oconee: 'northeast',
+  Oglethorpe: 'northeast',
+  Walton: 'northeast',
+
+  Butts: 'threeRivers',
+  Carroll: 'threeRivers',
+  Coweta: 'threeRivers',
+  Heard: 'threeRivers',
+  Lamar: 'threeRivers',
+  Meriwether: 'threeRivers',
+  Pike: 'threeRivers',
+  Spalding: 'threeRivers',
+  Troup: 'threeRivers',
+  Upson: 'threeRivers',
+
+  Baldwin: 'middleGeorgia',
+  Bibb: 'middleGeorgia',
+  Crawford: 'middleGeorgia',
+  Houston: 'middleGeorgia',
+  Jones: 'middleGeorgia',
+  Monroe: 'middleGeorgia',
+  Peach: 'middleGeorgia',
+  Pulaski: 'middleGeorgia',
+  Putnam: 'middleGeorgia',
+  Twiggs: 'middleGeorgia',
+  Wilkinson: 'middleGeorgia',
+
+  Burke: 'csra',
+  Columbia: 'csra',
+  Glascock: 'csra',
+  Hancock: 'csra',
+  Jefferson: 'csra',
+  Jenkins: 'csra',
+  Lincoln: 'csra',
+  McDuffie: 'csra',
+  Richmond: 'csra',
+  Taliaferro: 'csra',
+  Warren: 'csra',
+  Washington: 'csra',
+  Wilkes: 'csra',
+
+  Chattahoochee: 'riverValley',
+  Clay: 'riverValley',
+  Crisp: 'riverValley',
+  Dooly: 'riverValley',
+  Harris: 'riverValley',
+  Macon: 'riverValley',
+  Marion: 'riverValley',
+  Muscogee: 'riverValley',
+  Quitman: 'riverValley',
+  Randolph: 'riverValley',
+  Schley: 'riverValley',
+  Stewart: 'riverValley',
+  Sumter: 'riverValley',
+  Talbot: 'riverValley',
+  Taylor: 'riverValley',
+  Webster: 'riverValley',
+
+  Appling: 'heartAltamaha',
+  Bleckley: 'heartAltamaha',
+  Candler: 'heartAltamaha',
+  Dodge: 'heartAltamaha',
+  Emanuel: 'heartAltamaha',
+  Evans: 'heartAltamaha',
+  JeffDavis: 'heartAltamaha',
+  Johnson: 'heartAltamaha',
+  Laurens: 'heartAltamaha',
+  Montgomery: 'heartAltamaha',
+  Tattnall: 'heartAltamaha',
+  Telfair: 'heartAltamaha',
+  Toombs: 'heartAltamaha',
+  Treutlen: 'heartAltamaha',
+  Wayne: 'heartAltamaha',
+  Wheeler: 'heartAltamaha',
+  Wilcox: 'heartAltamaha',
+
+  Bryan: 'coastal',
+  Bulloch: 'coastal',
+  Camden: 'coastal',
+  Chatham: 'coastal',
+  Effingham: 'coastal',
+  Glynn: 'coastal',
+  Liberty: 'coastal',
+  Long: 'coastal',
+  McIntosh: 'coastal',
+  Screven: 'coastal',
+
+  Baker: 'southwest',
+  Calhoun: 'southwest',
+  Colquitt: 'southwest',
+  Decatur: 'southwest',
+  Dougherty: 'southwest',
+  Early: 'southwest',
+  Grady: 'southwest',
+  Lee: 'southwest',
+  Miller: 'southwest',
+  Mitchell: 'southwest',
+  Seminole: 'southwest',
+  Terrell: 'southwest',
+  Thomas: 'southwest',
+  Worth: 'southwest',
+
+  Atkinson: 'southern',
+  Bacon: 'southern',
+  BenHill: 'southern',
+  Berrien: 'southern',
+  Brantley: 'southern',
+  Brooks: 'southern',
+  Charlton: 'southern',
+  Clinch: 'southern',
+  Coffee: 'southern',
+  Cook: 'southern',
+  Echols: 'southern',
+  Irwin: 'southern',
+  Lanier: 'southern',
+  Lowndes: 'southern',
+  Pierce: 'southern',
+  Tift: 'southern',
+  Turner: 'southern',
+  Ware: 'southern',
+};
+
+function normalizeCountyName(county) {
+  return String(county || '')
+    .replace(/\s+County$/i, '')
+    .replace(/[^A-Za-z]/g, '');
+}
+
+function getRegionKey(item) {
+  const normalized = normalizeCountyName(item.county);
+  return COUNTY_TO_REGION[normalized] || 'all';
+}
+
+function matchesRegion(item, regionKey) {
+  return !regionKey || regionKey === 'all' || getRegionKey(item) === regionKey;
+}
+
+const clinicMarkerIcon = L.divIcon({
+  className: 'openvolMapMarkerWrapper',
+  html: '<div class="openvolMapMarker clinicMapMarker"><span>+</span></div>',
+  iconSize: [34, 42], iconAnchor: [17, 42], tooltipAnchor: [0, -38], popupAnchor: [0, -38],
+});
+
+const opportunityMarkerIcon = L.divIcon({
+  className: 'openvolMapMarkerWrapper',
+  html: '<div class="openvolMapMarker opportunityMapMarker"><span>★</span></div>',
+  iconSize: [34, 42], iconAnchor: [17, 42], tooltipAnchor: [0, -38], popupAnchor: [0, -38],
+});
+
+function FitMapBounds({ locations, selectedRegion }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (selectedRegion && selectedRegion !== 'all') {
+      const region = GEORGIA_REGIONS[selectedRegion];
+      map.setView(region.center, region.zoom);
+      return;
+    }
+
+    const points = locations
+      .filter(
+        (item) =>
+          Number.isFinite(Number(item.latitude)) &&
+          Number.isFinite(Number(item.longitude))
+      )
+      .map((item) => [Number(item.latitude), Number(item.longitude)]);
+
+    if (points.length === 1) {
+      map.setView(points[0], 12);
+    } else if (points.length > 1) {
+      map.fitBounds(points, {
+        padding: [36, 36],
+        maxZoom: 12,
+      });
+    } else {
+      map.setView(GEORGIA_REGIONS.all.center, GEORGIA_REGIONS.all.zoom);
+    }
+  }, [locations, selectedRegion, map]);
+
+  return null;
+}
+
+function LocationMap({
+  locations,
+  type = 'clinic',
+  heightClass = '',
+  selectedRegion = 'all',
+  onRegionChange,
+}) {
+  const validLocations = locations.filter((item) => Number.isFinite(Number(item.latitude)) && Number.isFinite(Number(item.longitude)));
+  const markerIcon = type === 'clinic' ? clinicMarkerIcon : opportunityMarkerIcon;
+  return (
+    <section className={`locationMapCard ${heightClass}`}>
+      <div className="locationMapHeader">
+        <div>
+          <h3>{type === 'clinic' ? 'Georgia Volunteer Regions' : 'Georgia Shadowing & Research Regions'}</h3>
+          <p>Select a Georgia region to display only the locations in that region.</p>
+        </div>
+
+        <div className="regionMapControls">
+          <label htmlFor={`${type}-region-map-select`}>Region</label>
+          <select
+            id={`${type}-region-map-select`}
+            value={selectedRegion}
+            onChange={(event) => onRegionChange?.(event.target.value)}
+          >
+            {Object.entries(GEORGIA_REGIONS).map(([key, region]) => (
+              <option key={key} value={key}>
+                {region.label}
+              </option>
+            ))}
+          </select>
+          <span className="mappedCount">{validLocations.length} mapped</span>
+        </div>
+      </div>
+      {validLocations.length === 0 ? (
+        <div className="mapEmptyState"><MapPin size={28}/><h4>No mapped locations are available yet.</h4><p>Add latitude and longitude values to these database records.</p></div>
+      ) : (
+        <MapContainer
+          center={GEORGIA_REGIONS[selectedRegion]?.center || GEORGIA_REGIONS.all.center}
+          zoom={GEORGIA_REGIONS[selectedRegion]?.zoom || GEORGIA_REGIONS.all.zoom}
+          scrollWheelZoom
+          className="openvolMap"
+        >
+          <TileLayer
+            attribution='&copy; OpenStreetMap contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+          <FitMapBounds locations={validLocations} selectedRegion={selectedRegion} />
+          {validLocations.map((item) => {
+            const title = type === 'clinic' ? item.clinic_name : item.opportunity_name;
+            const organization = type === 'clinic' ? null : item.organization_name;
+            const detailUrl = type === 'clinic' ? item.volunteer_url || item.website_url : item.application_url || item.website_url;
+            return (
+              <Marker key={`${type}-${item.id}`} position={[Number(item.latitude), Number(item.longitude)]} icon={markerIcon} eventHandlers={{ click: () => detailUrl && window.open(detailUrl, '_blank', 'noopener,noreferrer') }}>
+                <MapTooltip direction="top" sticky opacity={1}>
+                  <div className="mapTooltipContent"><strong>{title}</strong>{organization && <span>{organization}</span>}<span>{[item.city, item.county ? `${item.county} County` : null].filter(Boolean).join(', ')}</span><small>{type === 'clinic' ? item.volunteer_type : item.opportunity_category}</small></div>
+                </MapTooltip>
+                <Popup><div className="mapPopupContent"><strong>{title}</strong>{organization && <p>{organization}</p>}<p>{[item.city, item.county ? `${item.county} County` : null].filter(Boolean).join(', ')}</p>{detailUrl && <span>Click the pin to open details.</span>}</div></Popup>
+              </Marker>
+            );
+          })}
+        </MapContainer>
+      )}
+      {validLocations.length < locations.length && <p className="mapCoverageNotice">{locations.length - validLocations.length} location{locations.length - validLocations.length === 1 ? '' : 's'} do not yet have coordinates and are not shown.</p>}
+    </section>
+  );
+}
 
 function Header({ setRoute, route }) {
   return (
@@ -63,7 +435,7 @@ function Header({ setRoute, route }) {
   );
 }
 
-function Hero() {
+function Hero({ clinics, selectedRegion, onRegionChange }) {
   return (
     <section className="hero">
       <div className="heroText">
@@ -92,10 +464,13 @@ function Hero() {
         </div>
       </div>
 
-      <div className="heroCard">
-        <img
-          src="https://images.unsplash.com/photo-1526256262350-7da7584cf5eb?auto=format&fit=crop&w=1200&q=80"
-          alt="Healthcare volunteers"
+      <div className="heroMapColumn">
+        <LocationMap
+          locations={clinics}
+          type="clinic"
+          heightClass="heroLocationMap"
+          selectedRegion={selectedRegion}
+          onRegionChange={onRegionChange}
         />
       </div>
     </section>
@@ -612,6 +987,7 @@ function Home({ studentEmail, setStudentEmail }) {
     searchText: '',
     city: '',
     county: '',
+    region: 'all',
     minimumAge: '',
   });
 
@@ -658,13 +1034,20 @@ function Home({ studentEmail, setStudentEmail }) {
       const matchesText = !searchText || searchableText.includes(searchText);
       const matchesCity = !filters.city || clinic.city === filters.city;
       const matchesCounty = !filters.county || clinic.county === filters.county;
+      const matchesSelectedRegion = matchesRegion(clinic, filters.region);
 
       const matchesAge =
         !filters.minimumAge ||
         !clinic.minimum_age ||
         Number(filters.minimumAge) >= clinic.minimum_age;
 
-      return matchesText && matchesCity && matchesCounty && matchesAge;
+      return (
+        matchesText &&
+        matchesCity &&
+        matchesCounty &&
+        matchesSelectedRegion &&
+        matchesAge
+      );
     });
   }, [clinics, filters]);
 
@@ -681,7 +1064,11 @@ function Home({ studentEmail, setStudentEmail }) {
 
   return (
     <main>
-      <Hero />
+      <Hero
+        clinics={filteredClinics}
+        selectedRegion={filters.region}
+        onRegionChange={(region) => updateFilter('region', region)}
+      />
 
       <StudentEmailBox studentEmail={studentEmail} setStudentEmail={setStudentEmail} />
 
@@ -715,6 +1102,18 @@ function Home({ studentEmail, setStudentEmail }) {
           <option value="">All counties</option>
           {counties.map((county) => (
             <option key={county}>{county}</option>
+          ))}
+        </select>
+
+        <select
+          value={filters.region}
+          onChange={(event) => updateFilter('region', event.target.value)}
+          onBlur={handleSearch}
+        >
+          {Object.entries(GEORGIA_REGIONS).map(([key, region]) => (
+            <option key={key} value={key}>
+              {region.label}
+            </option>
           ))}
         </select>
 
@@ -762,7 +1161,7 @@ function Home({ studentEmail, setStudentEmail }) {
           <p>Try changing your search criteria, county, city, or age filter.</p>
           <button
             className="primary"
-            onClick={() => setFilters({ searchText: '', city: '', county: '', minimumAge: '' })}
+            onClick={() => setFilters({ searchText: '', city: '', county: '', region: 'all', minimumAge: '' })}
           >
             Clear Filters
           </button>
@@ -811,6 +1210,7 @@ function Opportunities({ studentEmail, setStudentEmail }) {
     searchText: '',
     category: '',
     county: '',
+    region: 'all',
   });
 
   useEffect(() => {
@@ -854,7 +1254,8 @@ function Opportunities({ studentEmail, setStudentEmail }) {
     return (
       (!searchText || searchableText.includes(searchText)) &&
       (!filters.category || item.opportunity_category === filters.category) &&
-      (!filters.county || item.county === filters.county)
+      (!filters.county || item.county === filters.county) &&
+      matchesRegion(item, filters.region)
     );
   });
 
@@ -866,6 +1267,16 @@ function Opportunities({ studentEmail, setStudentEmail }) {
       </section>
 
       <StudentEmailBox studentEmail={studentEmail} setStudentEmail={setStudentEmail} />
+
+      <LocationMap
+        locations={filtered}
+        type="opportunity"
+        heightClass="opportunityLocationMap"
+        selectedRegion={filters.region}
+        onRegionChange={(region) =>
+          setFilters((current) => ({ ...current, region }))
+        }
+      />
 
       <section className="searchPanel">
         <div className="searchBox">
@@ -900,6 +1311,19 @@ function Opportunities({ studentEmail, setStudentEmail }) {
           <option value="">All counties</option>
           {counties.map((county) => (
             <option key={county}>{county}</option>
+          ))}
+        </select>
+
+        <select
+          value={filters.region}
+          onChange={(event) =>
+            setFilters((current) => ({ ...current, region: event.target.value }))
+          }
+        >
+          {Object.entries(GEORGIA_REGIONS).map(([key, region]) => (
+            <option key={key} value={key}>
+              {region.label}
+            </option>
           ))}
         </select>
       </section>
