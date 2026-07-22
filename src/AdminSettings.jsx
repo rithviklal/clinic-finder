@@ -3,7 +3,7 @@ import {
   Activity, ArrowLeft, CheckCircle2, Database, Download, Flag,
   RefreshCw, Save, Server, ShieldCheck, Trash2, Wrench
 } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { supabase } from './lib/supabase';
 import './AdminSettings.css';
 
 const defaults = {
