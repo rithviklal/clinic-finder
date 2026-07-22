@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  Activity, BarChart3, Building2, Download, MousePointerClick,
-  RefreshCw, Search, Settings, TrendingUp
+  Activity, BarChart3, Building2, Download, Lightbulb, MousePointerClick,
+  RefreshCw, Search, Settings, Sparkles, TrendingUp
 } from 'lucide-react';
 import {
   CategoryScale, Chart as ChartJS, Filler, Legend, LinearScale,
@@ -39,6 +39,11 @@ function downloadCsv(filename, rows) {
   URL.revokeObjectURL(url);
 }
 
+function percentChange(current, previous) {
+  if (!previous) return current ? 100 : 0;
+  return Math.round(((current - previous) / previous) * 100);
+}
+
 function MetricCard({ icon, label, value, hint }) {
   return (
     <article className="admin-metric-card">
@@ -64,6 +69,15 @@ function RankingTable({ title, rows, labelKey, valueKey, emptyText }) {
         </div>
       ) : <p className="admin-empty">{emptyText}</p>}
     </section>
+  );
+}
+
+function InsightCard({ title, text, tone = 'neutral' }) {
+  return (
+    <article className={`admin-insight ${tone}`}>
+      <div className="admin-insight-icon"><Lightbulb size={19} /></div>
+      <div><strong>{title}</strong><p>{text}</p></div>
+    </article>
   );
 }
 
@@ -118,6 +132,53 @@ export default function AdminDashboard({ onOpenSettings }) {
     opportunity_clicks: sum.opportunity_clicks + Number(row.opportunity_clicks || 0)
   }), { page_views: 0, searches: 0, clinic_clicks: 0, opportunity_clicks: 0 }), [daily]);
 
+  const insights = useMemo(() => {
+    if (!daily.length) {
+      return [{ title: 'Waiting for activity', text: 'Build 73 insights will appear after analytics events are recorded.', tone: 'neutral' }];
+    }
+
+    const midpoint = Math.max(1, Math.floor(daily.length / 2));
+    const previousRows = daily.slice(0, midpoint);
+    const currentRows = daily.slice(midpoint);
+    const sum = (rows, key) => rows.reduce((total, row) => total + Number(row[key] || 0), 0);
+    const currentViews = sum(currentRows, 'page_views');
+    const previousViews = sum(previousRows, 'page_views');
+    const currentSearches = sum(currentRows, 'searches');
+    const previousSearches = sum(previousRows, 'searches');
+    const engagement = totals.page_views
+      ? Math.round(((totals.clinic_clicks + totals.opportunity_clicks) / totals.page_views) * 100)
+      : 0;
+    const viewTrend = percentChange(currentViews, previousViews);
+    const searchTrend = percentChange(currentSearches, previousSearches);
+    const cards = [
+      {
+        title: viewTrend >= 0 ? 'Traffic is growing' : 'Traffic softened',
+        text: `Page views are ${Math.abs(viewTrend)}% ${viewTrend >= 0 ? 'higher' : 'lower'} in the latest half of this range.`,
+        tone: viewTrend >= 0 ? 'positive' : 'warning'
+      },
+      {
+        title: searchTrend >= 0 ? 'Search demand increased' : 'Search demand declined',
+        text: `Search activity is ${Math.abs(searchTrend)}% ${searchTrend >= 0 ? 'higher' : 'lower'} than the earlier half of this range.`,
+        tone: searchTrend >= 0 ? 'positive' : 'warning'
+      },
+      {
+        title: 'Outbound engagement',
+        text: `${engagement}% of page views resulted in a clinic or opportunity click.`,
+        tone: engagement >= 10 ? 'positive' : 'neutral'
+      }
+    ];
+
+    if (searches[0]) {
+      cards.push({
+        title: 'Top student interest',
+        text: `“${searches[0].search_term}” is the most common search in the selected range.`,
+        tone: 'neutral'
+      });
+    }
+
+    return cards.slice(0, 4);
+  }, [daily, searches, totals]);
+
   const chartData = {
     labels: daily.map(row => new Date(`${row.analytics_date}T12:00:00`).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })),
     datasets: [
@@ -131,7 +192,7 @@ export default function AdminDashboard({ onOpenSettings }) {
   return (
     <main className="admin-page">
       <section className="admin-hero">
-        <div><span className="admin-eyebrow"><BarChart3 size={16} /> Build 72 Analytics</span><h1>Openvol Analytics</h1><p>Privacy-first, aggregate traffic metrics with no visitor profiling.</p></div>
+        <div><span className="admin-eyebrow"><BarChart3 size={16} /> Build 73 Analytics</span><h1>Openvol Analytics</h1><p>Privacy-first aggregate metrics with automatic, actionable insights.</p></div>
         <div className="admin-actions">
           <button onClick={load} disabled={status.loading}><RefreshCw size={17} className={status.loading ? 'spin' : ''} /> Refresh</button>
           <button onClick={exportAll}><Download size={17} /> Export CSV</button>
@@ -153,6 +214,11 @@ export default function AdminDashboard({ onOpenSettings }) {
         <MetricCard icon={<Search />} label="Searches" value={totals.searches} hint="Normalized search totals" />
         <MetricCard icon={<Building2 />} label="Clinic clicks" value={totals.clinic_clicks} hint="Outbound engagement" />
         <MetricCard icon={<MousePointerClick />} label="Opportunity clicks" value={totals.opportunity_clicks} hint="Outbound engagement" />
+      </section>
+
+      <section className="admin-panel admin-insights-panel">
+        <div className="admin-panel-heading"><div><span><Sparkles size={14} /> Build 73</span><h2>Automated insights</h2></div><TrendingUp size={22} /></div>
+        <div className="admin-insights-grid">{insights.map(insight => <InsightCard key={insight.title} {...insight} />)}</div>
       </section>
 
       <section className="admin-panel admin-chart-panel">
