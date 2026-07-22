@@ -28,6 +28,10 @@ function validCoordinates(item) {
   return Number.isFinite(latitude) && Number.isFinite(longitude) && Math.abs(latitude) <= 90 && Math.abs(longitude) <= 180 && !(latitude === 0 && longitude === 0);
 }
 
+function itemKey(item, index = 0) {
+  return `${item.kind || 'opportunity'}-${item.id ?? item.objectid ?? index}`;
+}
+
 function isRural(item) {
   const ruralCounties = new Set(['Appling','Atkinson','Bacon','Baker','Ben Hill','Berrien','Bleckley','Brantley','Brooks','Bryan','Bulloch','Burke','Calhoun','Camden','Candler','Charlton','Chattooga','Clay','Clinch','Coffee','Colquitt','Cook','Crisp','Dade','Decatur','Dodge','Dooly','Early','Echols','Effingham','Elbert','Emanuel','Evans','Fannin','Franklin','Gilmer','Glascock','Grady','Greene','Habersham','Hancock','Haralson','Hart','Heard','Irwin','Jeff Davis','Jefferson','Jenkins','Johnson','Lanier','Laurens','Liberty','Lincoln','Long','Lumpkin','Macon','Marion','McDuffie','McIntosh','Miller','Mitchell','Montgomery','Morgan','Murray','Pierce','Polk','Pulaski','Putnam','Quitman','Rabun','Randolph','Schley','Screven','Seminole','Stephens','Stewart','Sumter','Talbot','Taliaferro','Tattnall','Taylor','Telfair','Terrell','Thomas','Tift','Toombs','Towns','Treutlen','Turner','Union','Ware','Warren','Washington','Wayne','Webster','Wheeler','White','Wilcox','Wilkes','Worth']);
   const text = `${item.county || ''} ${item.city || ''} ${item.notes || ''} ${item.volunteer_type || ''} ${item.opportunity_category || ''}`.toLowerCase();
@@ -46,17 +50,25 @@ function escapeHtml(value = '') {
 }
 
 function asGeoJson(items, ruralMode) {
+  const valid = items.filter(validCoordinates);
   return {
     type: 'FeatureCollection',
-    features: items.filter(validCoordinates).map(item => {
+    features: valid.map((item, index) => {
       const category = ruralMode ? 'rural' : categoryOf(item);
+      const score = Math.max(0, Math.min(100, Math.round(Number(item.matchScore) || 0)));
       return {
-        type: 'Feature', id: `${item.kind}-${item.id}`,
+        type: 'Feature', id: itemKey(item, index),
         geometry: { type: 'Point', coordinates: [Number(item.longitude), Number(item.latitude)] },
         properties: {
-          key: `${item.kind}-${item.id}`,
-          title: item.title || item.organization || 'Opportunity', organization: item.organization || '',
-          city: item.city || 'Georgia', county: item.county || '', category, color: CATEGORY_COLORS[category]
+          key: itemKey(item, index),
+          title: item.title || item.organization || 'Opportunity',
+          organization: item.organization || '',
+          city: item.city || 'Georgia', county: item.county || '', category,
+          specialty: item.specialty || '', opportunityType: item.opportunity_type || item.opportunity_category || '',
+          color: CATEGORY_COLORS[category], score,
+          reasons: Array.isArray(item.matchReasons) ? item.matchReasons.slice(0, 3).join('|') : '',
+          distance: Number.isFinite(Number(item.distanceMiles)) ? Number(item.distanceMiles).toFixed(1) : '',
+          best: index === 0 && score > 0 ? 1 : 0
         }
       };
     })
@@ -106,8 +118,9 @@ export default function MapLibreOpportunityMap({ items, activeId, onSelect, rura
       map.addLayer({ id: 'opportunity-clusters-halo', type: 'circle', source: 'opportunities', filter: ['has', 'point_count'], paint: { 'circle-color': 'rgba(255,255,255,.88)', 'circle-radius': ['step', ['get', 'point_count'], 24, 20, 30, 60, 37], 'circle-stroke-width': 1, 'circle-stroke-color': 'rgba(11,31,51,.12)' } });
       map.addLayer({ id: 'opportunity-clusters', type: 'circle', source: 'opportunities', filter: ['has', 'point_count'], paint: { 'circle-color': ['step', ['get', 'point_count'], '#1769e0', 20, '#125bbf', 60, '#0b3f86'], 'circle-radius': ['step', ['get', 'point_count'], 18, 20, 24, 60, 31], 'circle-stroke-width': 3, 'circle-stroke-color': '#fff' } });
       map.addLayer({ id: 'cluster-count', type: 'symbol', source: 'opportunities', filter: ['has', 'point_count'], layout: { 'text-field': ['get', 'point_count_abbreviated'], 'text-font': ['Noto Sans Bold'], 'text-size': 12 }, paint: { 'text-color': '#fff' } });
-      map.addLayer({ id: 'opportunity-points-halo', type: 'circle', source: 'opportunities', filter: ['!', ['has', 'point_count']], paint: { 'circle-radius': 11, 'circle-color': '#fff' } });
-      map.addLayer({ id: 'opportunity-points', type: 'circle', source: 'opportunities', filter: ['!', ['has', 'point_count']], paint: { 'circle-radius': 7.5, 'circle-color': ['get', 'color'], 'circle-stroke-width': 2, 'circle-stroke-color': '#fff' } });
+      map.addLayer({ id: 'opportunity-points-halo', type: 'circle', source: 'opportunities', filter: ['!', ['has', 'point_count']], paint: { 'circle-radius': ['case', ['==', ['get', 'best'], 1], 16, ['interpolate', ['linear'], ['get', 'score'], 0, 10, 100, 13]], 'circle-color': ['case', ['==', ['get', 'best'], 1], 'rgba(245,158,11,.28)', '#fff'], 'circle-stroke-width': ['case', ['==', ['get', 'best'], 1], 2, 0], 'circle-stroke-color': '#f59e0b' } });
+      map.addLayer({ id: 'opportunity-points', type: 'circle', source: 'opportunities', filter: ['!', ['has', 'point_count']], paint: { 'circle-radius': ['case', ['==', ['get', 'best'], 1], 9.5, ['interpolate', ['linear'], ['get', 'score'], 0, 7, 100, 9]], 'circle-color': ['get', 'color'], 'circle-stroke-width': ['case', ['==', ['get', 'best'], 1], 3, 2], 'circle-stroke-color': '#fff' } });
+      map.addLayer({ id: 'best-match-label', type: 'symbol', source: 'opportunities', filter: ['all', ['!', ['has', 'point_count']], ['==', ['get', 'best'], 1]], minzoom: 6, layout: { 'text-field': 'Best match', 'text-size': 11, 'text-font': ['Noto Sans Bold'], 'text-offset': [0, -1.9], 'text-anchor': 'bottom', 'text-padding': 5 }, paint: { 'text-color': '#7c2d12', 'text-halo-color': '#fff', 'text-halo-width': 2 } });
       map.addSource('georgia-regions', { type: 'geojson', data: REGION_FEATURES });
       map.addLayer({ id: 'region-circles', type: 'circle', source: 'georgia-regions', layout: { visibility: 'none' }, paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 5, ['*', ['get', 'radius'], .62], 8, ['*', ['get', 'radius'], 1.55]], 'circle-color': 'rgba(23,105,224,.09)', 'circle-stroke-color': 'rgba(23,105,224,.38)', 'circle-stroke-width': 1.5 } });
       map.addLayer({ id: 'region-labels', type: 'symbol', source: 'georgia-regions', layout: { visibility: 'none', 'text-field': ['get', 'name'], 'text-size': 11, 'text-font': ['Noto Sans Bold'] }, paint: { 'text-color': '#0b3f86', 'text-halo-color': 'rgba(255,255,255,.9)', 'text-halo-width': 2 } });
@@ -133,10 +146,20 @@ export default function MapLibreOpportunityMap({ items, activeId, onSelect, rura
     map.on('click', 'opportunity-points', event => {
       const feature = event.features?.[0];
       if (!feature) return;
-      const item = itemsRef.current.find(candidate => `${candidate.kind}-${candidate.id}` === feature.properties.key);
+      const item = itemsRef.current.find((candidate, index) => itemKey(candidate, index) === feature.properties.key);
       if (item) onSelect?.(item);
-      const place = [feature.properties.city, feature.properties.county ? `${feature.properties.county} County` : ''].filter(Boolean).join(', ');
-      new maplibregl.Popup({ offset: 18, closeButton: false, className: 'openvol-map-popup' }).setLngLat(feature.geometry.coordinates).setHTML(`<div class="map-popup-content"><span>${escapeHtml(feature.properties.category)}</span><b>${escapeHtml(feature.properties.title)}</b><small>${escapeHtml(place)}</small></div>`).addTo(map);
+      const county = String(feature.properties.county || '').replace(/ County$/i, '');
+      const place = [feature.properties.city, county ? `${county} County` : ''].filter(Boolean).join(', ');
+      const reasons = String(feature.properties.reasons || '').split('|').filter(Boolean);
+      const score = Number(feature.properties.score || 0);
+      const badges = [feature.properties.specialty, feature.properties.opportunityType].filter(Boolean).map(value => `<span>${escapeHtml(value)}</span>`).join('');
+      const explanation = reasons.length ? `<div class="map-popup-reasons"><strong>Why this matched</strong><ul>${reasons.map(reason => `<li>${escapeHtml(reason)}</li>`).join('')}</ul></div>` : '';
+      const distance = feature.properties.distance ? `<small>${escapeHtml(feature.properties.distance)} miles away</small>` : '';
+      const match = score > 0 ? `<div class="map-popup-score"><b>${score}%</b><span>${feature.properties.best ? 'Best match' : 'match'}</span></div>` : '';
+      new maplibregl.Popup({ offset: 20, closeButton: true, className: 'openvol-map-popup', maxWidth: '340px' })
+        .setLngLat(feature.geometry.coordinates)
+        .setHTML(`<div class="map-popup-content">${match}<div class="map-popup-category">${escapeHtml(feature.properties.category)}</div><h3>${escapeHtml(feature.properties.title)}</h3>${feature.properties.organization ? `<p>${escapeHtml(feature.properties.organization)}</p>` : ''}<small>${escapeHtml(place)}</small>${distance}${badges ? `<div class="map-popup-badges">${badges}</div>` : ''}${explanation}</div>`)
+        .addTo(map);
     });
     ['opportunity-clusters', 'opportunity-points'].forEach(layer => {
       map.on('mouseenter', layer, () => { map.getCanvas().style.cursor = 'pointer'; });
@@ -169,8 +192,8 @@ export default function MapLibreOpportunityMap({ items, activeId, onSelect, rura
     const map = mapRef.current;
     if (!mapReady || !map?.getLayer('opportunity-points')) return;
     const active = activeId || '';
-    map.setPaintProperty('opportunity-points', 'circle-radius', ['case', ['==', ['get', 'key'], active], 10, 7.5]);
-    map.setPaintProperty('opportunity-points-halo', 'circle-radius', ['case', ['==', ['get', 'key'], active], 14, 11]);
+    map.setPaintProperty('opportunity-points', 'circle-radius', ['case', ['==', ['get', 'key'], active], 11, ['==', ['get', 'best'], 1], 9.5, ['interpolate', ['linear'], ['get', 'score'], 0, 7, 100, 9]]);
+    map.setPaintProperty('opportunity-points-halo', 'circle-radius', ['case', ['==', ['get', 'key'], active], 16, ['==', ['get', 'best'], 1], 16, ['interpolate', ['linear'], ['get', 'score'], 0, 10, 100, 13]]);
   }, [activeId, mapReady]);
 
   const setLayerVisibility = (ids, visible) => ids.forEach(id => { if (mapRef.current?.getLayer(id)) mapRef.current.setLayoutProperty(id, 'visibility', visible ? 'visible' : 'none'); });
