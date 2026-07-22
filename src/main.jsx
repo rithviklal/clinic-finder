@@ -11,6 +11,8 @@ import MapWorkspace from './MapWorkspace';
 import { parseSearchIntent, scoreOpportunity } from './searchIntent';
 import { supabase } from './lib/supabase';
 import { trackPageView, trackClinicClick, trackOpportunityClick, trackSearch } from './lib/tracking';
+import AdminDashboard from './pages/AdminDashboard';
+import AdminSettings from './pages/AdminSettings';
 import './styles.css';
 import './build71.css';
 
