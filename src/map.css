@@ -132,7 +132,7 @@
   top: 72px;
   right: 18px;
   display: flex;
-  gap: 6px;
+  gap: 5px;
   padding: 5px;
   border: 1px solid rgba(210, 223, 234, 0.92);
   border-radius: 14px;
@@ -174,25 +174,60 @@
   bottom: 18px;
 }
 
-/* Build 67.1: the discovery filters remain the primary top row.
-   Map tools now form a clean second row beneath them. */
-.premium-map .premium-map-toolbar {
-  top: 76px;
-  left: 18px;
+/* Build 68 command center: category filters, map layers, location and
+   fullscreen now read as one continuous control row below the search box. */
+.discovery-shell .category-chip-row {
+  top: 78px;
+  left: 24px;
+  right: 330px;
+  gap: 3px;
+  min-height: 50px;
+  padding: 5px;
+  overflow-x: auto;
+  border: 1px solid rgba(210, 223, 234, 0.92);
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 10px 28px rgba(15, 35, 55, 0.15);
+  backdrop-filter: blur(16px);
 }
 
-.premium-map .search-this-area {
-  top: 78px;
-  left: 292px;
+.discovery-shell .category-chip-row button {
   min-height: 38px;
-  transform: none;
-  border-radius: 11px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  box-shadow: none;
+}
+
+.discovery-shell .category-chip-row button:hover,
+.discovery-shell .category-chip-row button.active {
+  border-color: transparent;
+  background: #1769e0;
+  color: #fff;
+  box-shadow: 0 7px 18px rgba(23, 105, 224, 0.22);
+}
+
+.premium-map .premium-map-toolbar {
+  top: 78px;
+  right: 116px;
+  left: auto;
+  min-height: 50px;
   box-shadow: 0 10px 28px rgba(15, 35, 55, 0.15);
 }
 
 .premium-map .premium-quick-controls {
-  top: 76px;
-  right: 18px;
+  top: 78px;
+  right: 24px;
+  min-height: 50px;
+}
+
+.premium-map .search-this-area {
+  top: 138px;
+  left: 50%;
+  min-height: 40px;
+  transform: translateX(-50%);
+  border-radius: 999px;
 }
 
 .openvol-map-popup .maplibregl-popup-content {
@@ -246,13 +281,8 @@
 
 .maplibre-wrap:fullscreen .premium-map-toolbar {
   top: 18px;
-  left: 18px;
-}
-
-.maplibre-wrap:fullscreen .search-this-area {
-  top: 20px;
-  left: 292px;
-  transform: none;
+  right: 116px;
+  left: auto;
 }
 
 .maplibre-wrap:fullscreen .premium-quick-controls {
@@ -260,54 +290,80 @@
   right: 18px;
 }
 
-@media (max-width: 900px) {
-  .premium-map .search-this-area {
-    left: 18px;
-    top: 126px;
-  }
-
-  .premium-map .premium-quick-controls {
-    top: 76px;
-  }
+.maplibre-wrap:fullscreen .search-this-area {
+  top: 78px;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
-@media (max-width: 760px) {
-  .premium-map-toolbar {
-    top: 10px;
-    left: 10px;
-    max-width: calc(100% - 20px);
-  }
-
-  .premium-map-toolbar button {
-    padding: 0 10px;
+@media (max-width: 1120px) {
+  .discovery-shell .category-chip-row {
+    right: 286px;
   }
 
   .premium-map-toolbar button span:not(.three-d-icon) {
     display: none;
   }
 
-  .search-this-area {
-    top: 61px;
+  .premium-map-toolbar button {
+    width: 38px;
+    padding: 0;
   }
+}
 
-  .premium-quick-controls {
-    top: 112px;
-    right: 10px;
+@media (max-width: 900px) {
+  .discovery-shell .category-chip-row {
+    right: 24px;
   }
 
   .premium-map .premium-map-toolbar {
-    top: 70px;
+    top: 136px;
+    right: auto;
+    left: 24px;
+  }
+
+  .premium-map .premium-quick-controls {
+    top: 136px;
+    right: 24px;
+  }
+
+  .premium-map .search-this-area {
+    top: 194px;
+  }
+}
+
+@media (max-width: 760px) {
+  .discovery-shell .category-chip-row {
+    top: 76px;
+    left: 10px;
+    right: 10px;
+  }
+
+  .premium-map-toolbar {
+    max-width: calc(100% - 20px);
+  }
+
+  .premium-map-toolbar button {
+    width: 38px;
+    padding: 0;
+  }
+
+  .premium-map-toolbar button span:not(.three-d-icon) {
+    display: none;
+  }
+
+  .premium-map .premium-map-toolbar {
+    top: 134px;
     left: 10px;
   }
 
   .premium-map .premium-quick-controls {
-    top: 70px;
+    top: 134px;
     right: 10px;
   }
 
   .premium-map .search-this-area {
-    top: 120px;
-    left: 10px;
+    top: 192px;
     min-height: 40px;
   }
 
@@ -318,7 +374,8 @@
 
   .maplibre-wrap:fullscreen .premium-map-toolbar {
     top: 10px;
-    left: 10px;
+    right: 104px;
+    left: auto;
   }
 
   .maplibre-wrap:fullscreen .premium-quick-controls {
@@ -327,19 +384,18 @@
   }
 
   .maplibre-wrap:fullscreen .search-this-area {
-    top: 60px;
-    left: 10px;
+    top: 68px;
   }
 }
 
 @media (max-width: 520px) {
   .premium-map-toolbar button {
-    width: 38px;
-    padding: 0;
+    width: 36px;
+    height: 36px;
   }
 
   .premium-quick-controls button {
-    width: 36px;
+    width: 34px;
     height: 36px;
   }
 
