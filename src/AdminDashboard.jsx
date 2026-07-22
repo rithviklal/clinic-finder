@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  Activity, BarChart3, Building2, CalendarDays, Download, FileText,
-  Lightbulb, MapPin, MousePointerClick, RefreshCw, Search, Settings,
-  Sparkles, Target, TrendingUp, Users
+  Activity, BarChart3, Bookmark, Building2, CalendarDays, Download,
+  FileText, Lightbulb, MapPin, MessageSquare, MousePointerClick,
+  RefreshCw, Search, Settings, Sparkles, Target, TrendingUp, Users
 } from 'lucide-react';
 import {
   CategoryScale, Chart as ChartJS, Filler, Legend, LinearScale,
@@ -16,8 +16,17 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, T
 
 const RANGE_OPTIONS = [7, 30, 90];
 const GEORGIA_SIGNALS = ['atlanta', 'alpharetta', 'savannah', 'augusta', 'macon', 'athens', 'columbus', 'marietta', 'roswell', 'johns creek', 'fulton', 'cobb', 'gwinnett', 'dekalb', 'cherokee', 'forsyth'];
+const HISTORICAL_TABLES = [
+  { table: 'saved_clinics', label: 'Saved clinics', icon: Bookmark },
+  { table: 'saved_opportunities', label: 'Saved opportunities', icon: Bookmark },
+  { table: 'search_events', label: 'Historical searches', icon: Search },
+  { table: 'student_profiles', label: 'Student profiles', icon: Users },
+  { table: 'visitors', label: 'Historical visitors', icon: Activity },
+  { table: 'website_feedback', label: 'Website feedback', icon: MessageSquare }
+];
 
 function number(value) {
+  if (typeof value === 'string' && value.trim().endsWith('%')) return value;
   return new Intl.NumberFormat('en-US').format(Number(value || 0));
 }
 
@@ -97,6 +106,20 @@ function FunnelStep({ label, value, percent, icon }) {
   );
 }
 
+function HistoricalCard({ item }) {
+  const Icon = item.icon;
+  return (
+    <article className={`historical-card ${item.error ? 'unavailable' : ''}`}>
+      <div className="historical-icon"><Icon size={20} /></div>
+      <div>
+        <span>{item.label}</span>
+        <strong>{item.error ? '—' : number(item.count)}</strong>
+        <small>{item.error ? 'Unavailable with current database permissions' : 'All-time records'}</small>
+      </div>
+    </article>
+  );
+}
+
 export default function AdminDashboard({ onOpenSettings }) {
   const [range, setRange] = useState(30);
   const [daily, setDaily] = useState([]);
@@ -104,13 +127,14 @@ export default function AdminDashboard({ onOpenSettings }) {
   const [searches, setSearches] = useState([]);
   const [clinics, setClinics] = useState([]);
   const [opportunities, setOpportunities] = useState([]);
+  const [historical, setHistorical] = useState(HISTORICAL_TABLES.map(item => ({ ...item, count: 0, error: '' })));
   const [status, setStatus] = useState({ loading: true, error: '', refreshedAt: null });
 
   const load = useCallback(async () => {
     setStatus(current => ({ ...current, loading: true, error: '' }));
     const start = dateKey(range - 1);
 
-    const [dailyResult, pageResult, searchResult, clinicResult, opportunityResult] = await Promise.all([
+    const analyticsPromise = Promise.all([
       supabase.from('analytics_daily').select('*').gte('analytics_date', start).order('analytics_date'),
       supabase.from('analytics_pages').select('page_path,view_count').gte('analytics_date', start).order('view_count', { ascending: false }).limit(100),
       supabase.from('analytics_searches').select('search_term,search_count').gte('analytics_date', start).order('search_count', { ascending: false }).limit(100),
@@ -118,11 +142,14 @@ export default function AdminDashboard({ onOpenSettings }) {
       supabase.from('analytics_opportunities').select('opportunity_id,click_count').gte('analytics_date', start).order('click_count', { ascending: false }).limit(100)
     ]);
 
-    const error = [dailyResult, pageResult, searchResult, clinicResult, opportunityResult].find(result => result.error)?.error;
-    if (error) {
-      setStatus({ loading: false, error: error.message, refreshedAt: null });
-      return;
-    }
+    const historicalPromise = Promise.all(HISTORICAL_TABLES.map(async item => {
+      const { count, error } = await supabase.from(item.table).select('*', { count: 'exact', head: true });
+      return { ...item, count: count || 0, error: error?.message || '' };
+    }));
+
+    const [analyticsResults, historicalResults] = await Promise.all([analyticsPromise, historicalPromise]);
+    const [dailyResult, pageResult, searchResult, clinicResult, opportunityResult] = analyticsResults;
+    const error = analyticsResults.find(result => result.error)?.error;
 
     const aggregate = (rows, key, valueKey) => Object.values((rows || []).reduce((acc, row) => {
       const id = row[key] || 'Unknown';
@@ -130,6 +157,12 @@ export default function AdminDashboard({ onOpenSettings }) {
       acc[id][valueKey] += Number(row[valueKey] || 0);
       return acc;
     }, {})).sort((a, b) => b[valueKey] - a[valueKey]);
+
+    setHistorical(historicalResults);
+    if (error) {
+      setStatus({ loading: false, error: error.message, refreshedAt: new Date() });
+      return;
+    }
 
     setDaily(dailyResult.data || []);
     setPages(aggregate(pageResult.data, 'page_path', 'view_count'));
@@ -148,6 +181,10 @@ export default function AdminDashboard({ onOpenSettings }) {
     opportunity_clicks: sum.opportunity_clicks + Number(row.opportunity_clicks || 0)
   }), { page_views: 0, searches: 0, clinic_clicks: 0, opportunity_clicks: 0 }), [daily]);
 
+  const historicalTotals = useMemo(() => Object.fromEntries(historical.map(item => [item.table, item.error ? 0 : item.count])), [historical]);
+  const totalSaved = (historicalTotals.saved_clinics || 0) + (historicalTotals.saved_opportunities || 0);
+  const totalSearchesAllTime = (historicalTotals.search_events || 0) + totals.searches;
+
   const executive = useMemo(() => {
     const today = daily.at(-1) || {};
     const yesterday = daily.at(-2) || {};
@@ -164,24 +201,25 @@ export default function AdminDashboard({ onOpenSettings }) {
   }, [daily, totals]);
 
   const insights = useMemo(() => {
-    if (!daily.length) return [{ title: 'Waiting for activity', text: 'Build 73 insights will appear after analytics events are recorded.', tone: 'neutral' }];
-    const midpoint = Math.max(1, Math.floor(daily.length / 2));
-    const previousRows = daily.slice(0, midpoint);
-    const currentRows = daily.slice(midpoint);
-    const viewTrend = percentChange(sumRows(currentRows, 'page_views'), sumRows(previousRows, 'page_views'));
-    const searchTrend = percentChange(sumRows(currentRows, 'searches'), sumRows(previousRows, 'searches'));
-    const cards = [
-      { title: viewTrend >= 0 ? 'Traffic is growing' : 'Traffic softened', text: `Page views are ${Math.abs(viewTrend)}% ${viewTrend >= 0 ? 'higher' : 'lower'} in the latest half of this range.`, tone: viewTrend >= 0 ? 'positive' : 'warning' },
-      { title: searchTrend >= 0 ? 'Search demand increased' : 'Search demand declined', text: `Search activity is ${Math.abs(searchTrend)}% ${searchTrend >= 0 ? 'higher' : 'lower'} than the earlier half of this range.`, tone: searchTrend >= 0 ? 'positive' : 'warning' },
-      { title: 'Outbound engagement', text: `${executive.engagement}% of page views resulted in a clinic or opportunity click.`, tone: executive.engagement >= 10 ? 'positive' : 'neutral' }
-    ];
-    if (searches[0]) cards.push({ title: 'Top student interest', text: `“${searches[0].search_term}” is the most common search in the selected range.`, tone: 'neutral' });
-    return cards.slice(0, 4);
-  }, [daily, executive.engagement, searches]);
+    const cards = [];
+    if (daily.length) {
+      const midpoint = Math.max(1, Math.floor(daily.length / 2));
+      const previousRows = daily.slice(0, midpoint);
+      const currentRows = daily.slice(midpoint);
+      const viewTrend = percentChange(sumRows(currentRows, 'page_views'), sumRows(previousRows, 'page_views'));
+      const searchTrend = percentChange(sumRows(currentRows, 'searches'), sumRows(previousRows, 'searches'));
+      cards.push(
+        { title: viewTrend >= 0 ? 'Traffic is growing' : 'Traffic softened', text: `Page views are ${Math.abs(viewTrend)}% ${viewTrend >= 0 ? 'higher' : 'lower'} in the latest half of this range.`, tone: viewTrend >= 0 ? 'positive' : 'warning' },
+        { title: searchTrend >= 0 ? 'Search demand increased' : 'Search demand declined', text: `Search activity is ${Math.abs(searchTrend)}% ${searchTrend >= 0 ? 'higher' : 'lower'} than the earlier half of this range.`, tone: searchTrend >= 0 ? 'positive' : 'warning' }
+      );
+    }
+    if (historicalTotals.student_profiles || totalSaved) cards.push({ title: 'Historical student engagement', text: `${number(historicalTotals.student_profiles)} student profiles have created ${number(totalSaved)} saved-item records.`, tone: 'positive' });
+    if (historicalTotals.search_events) cards.push({ title: 'Historical search depth', text: `${number(historicalTotals.search_events)} legacy search events are now included alongside Build 73 analytics.`, tone: 'neutral' });
+    if (searches[0]) cards.push({ title: 'Top student interest', text: `“${searches[0].search_term}” is the most common recent search.`, tone: 'neutral' });
+    return cards.length ? cards.slice(0, 4) : [{ title: 'Waiting for activity', text: 'Insights will appear after analytics or historical records are accessible.', tone: 'neutral' }];
+  }, [daily, historicalTotals, searches, totalSaved]);
 
-  const geographicSignals = useMemo(() => searches
-    .filter(row => GEORGIA_SIGNALS.some(place => String(row.search_term || '').toLowerCase().includes(place)))
-    .slice(0, 8), [searches]);
+  const geographicSignals = useMemo(() => searches.filter(row => GEORGIA_SIGNALS.some(place => String(row.search_term || '').toLowerCase().includes(place))).slice(0, 8), [searches]);
 
   const forecast = useMemo(() => {
     if (daily.length < 4) return { direction: 'Not enough data', projected: 0, confidence: 'Low' };
@@ -190,11 +228,7 @@ export default function AdminDashboard({ onOpenSettings }) {
     const recentAverage = sumRows(recent, 'page_views') / recent.length;
     const earlierAverage = earlier.length ? sumRows(earlier, 'page_views') / earlier.length : recentAverage;
     const growth = earlierAverage ? (recentAverage - earlierAverage) / earlierAverage : 0;
-    return {
-      direction: growth >= 0 ? 'Upward' : 'Downward',
-      projected: Math.max(0, Math.round(recentAverage * (1 + growth) * 7)),
-      confidence: daily.length >= 14 ? 'Medium' : 'Low'
-    };
+    return { direction: growth >= 0 ? 'Upward' : 'Downward', projected: Math.max(0, Math.round(recentAverage * (1 + growth) * 7)), confidence: daily.length >= 14 ? 'Medium' : 'Low' };
   }, [daily]);
 
   const chartData = {
@@ -209,7 +243,7 @@ export default function AdminDashboard({ onOpenSettings }) {
   const printReport = () => {
     const report = window.open('', '_blank', 'noopener,noreferrer');
     if (!report) return;
-    report.document.write(`<html><head><title>Openvol Build 73 Executive Report</title><style>body{font-family:Arial;padding:40px;color:#15332c}h1{margin-bottom:4px}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.card{border:1px solid #dbe5e2;border-radius:12px;padding:16px}.muted{color:#657873}</style></head><body><h1>Openvol Executive Analytics Report</h1><p class="muted">Build 73 · Last ${range} days · Generated ${new Date().toLocaleString()}</p><div class="grid"><div class="card"><b>Page views</b><h2>${number(totals.page_views)}</h2></div><div class="card"><b>Searches</b><h2>${number(totals.searches)}</h2></div><div class="card"><b>Clinic clicks</b><h2>${number(totals.clinic_clicks)}</h2></div><div class="card"><b>Opportunity clicks</b><h2>${number(totals.opportunity_clicks)}</h2></div></div><h2>Automated insights</h2>${insights.map(item => `<div class="card"><b>${item.title}</b><p>${item.text}</p></div>`).join('')}<h2>Forecast</h2><p>${forecast.direction} trend; projected ${number(forecast.projected)} page views over the next 7 days (${forecast.confidence.toLowerCase()} confidence).</p></body></html>`);
+    report.document.write(`<html><head><title>Openvol Build 73 Executive Report</title><style>body{font-family:Arial;padding:40px;color:#15332c}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.card{border:1px solid #dbe5e2;border-radius:12px;padding:16px}.muted{color:#657873}</style></head><body><h1>Openvol Executive Analytics Report</h1><p class="muted">Build 73 · Generated ${new Date().toLocaleString()}</p><div class="grid"><div class="card"><b>Page views</b><h2>${number(totals.page_views)}</h2></div><div class="card"><b>All-time searches</b><h2>${number(totalSearchesAllTime)}</h2></div><div class="card"><b>Student profiles</b><h2>${number(historicalTotals.student_profiles)}</h2></div><div class="card"><b>Saved items</b><h2>${number(totalSaved)}</h2></div></div><h2>Automated insights</h2>${insights.map(item => `<div class="card"><b>${item.title}</b><p>${item.text}</p></div>`).join('')}</body></html>`);
     report.document.close();
     report.focus();
     report.print();
@@ -218,7 +252,7 @@ export default function AdminDashboard({ onOpenSettings }) {
   return (
     <main className="admin-page">
       <section className="admin-hero">
-        <div><span className="admin-eyebrow"><BarChart3 size={16} /> Build 73 Analytics</span><h1>Openvol Analytics</h1><p>Executive KPIs, geographic demand signals, predictive trends, and student engagement insights.</p></div>
+        <div><span className="admin-eyebrow"><BarChart3 size={16} /> Build 73 Analytics</span><h1>Openvol Analytics</h1><p>Recent aggregate analytics combined with Openvol's historical engagement data.</p></div>
         <div className="admin-actions">
           <button onClick={load} disabled={status.loading}><RefreshCw size={17} className={status.loading ? 'spin' : ''} /> Refresh</button>
           <button onClick={exportAll}><Download size={17} /> Export CSV</button>
@@ -232,20 +266,25 @@ export default function AdminDashboard({ onOpenSettings }) {
         <small>{status.refreshedAt ? `Updated ${status.refreshedAt.toLocaleTimeString()}` : 'Aggregate metrics only'}</small>
       </section>
 
-      {status.error && <div className="admin-error"><strong>Analytics could not load.</strong><span>{status.error}</span></div>}
+      {status.error && <div className="admin-error"><strong>Recent analytics could not load.</strong><span>{status.error}</span></div>}
 
       <section className="admin-metrics">
         <MetricCard icon={<Activity />} label="Page views" value={totals.page_views} hint={`Last ${range} days`} />
-        <MetricCard icon={<Search />} label="Searches" value={totals.searches} hint="Student demand" />
-        <MetricCard icon={<Building2 />} label="Clinic clicks" value={totals.clinic_clicks} hint="Outbound engagement" />
-        <MetricCard icon={<MousePointerClick />} label="Opportunity clicks" value={totals.opportunity_clicks} hint="Outbound engagement" />
+        <MetricCard icon={<Search />} label="All-time searches" value={totalSearchesAllTime} hint="Historical + recent" />
+        <MetricCard icon={<Users />} label="Student profiles" value={historicalTotals.student_profiles} hint="Historical total" />
+        <MetricCard icon={<Bookmark />} label="Saved items" value={totalSaved} hint="Clinics + opportunities" />
+      </section>
+
+      <section className="admin-panel historical-panel">
+        <div className="admin-panel-heading"><div><span>Historical database</span><h2>Legacy engagement records</h2></div><Activity size={22} /></div>
+        <div className="historical-grid">{historical.map(item => <HistoricalCard key={item.table} item={item} />)}</div>
       </section>
 
       <section className="admin-executive-grid">
         <MetricCard icon={<CalendarDays />} label="Today" value={executive.todayViews} hint={`${percentChange(executive.todayViews, executive.yesterdayViews)}% vs yesterday`} />
         <MetricCard icon={<TrendingUp />} label="7-day views" value={executive.sevenDayViews} hint={`${number(executive.sevenDaySearches)} searches`} />
         <MetricCard icon={<Target />} label="Engagement rate" value={`${executive.engagement}%`} hint="Clicks per page view" />
-        <MetricCard icon={<Users />} label="Search conversion" value={`${executive.searchConversion}%`} hint="Searches per page view" />
+        <MetricCard icon={<MessageSquare />} label="Feedback records" value={historicalTotals.website_feedback} hint="Historical total" />
       </section>
 
       <section className="admin-panel admin-insights-panel">
@@ -260,28 +299,29 @@ export default function AdminDashboard({ onOpenSettings }) {
 
       <section className="admin-strategy-grid">
         <section className="admin-panel">
-          <div className="admin-panel-heading"><div><span>Conversion</span><h2>Student journey funnel</h2></div><Target size={22} /></div>
+          <div className="admin-panel-heading"><div><span>Historical funnel</span><h2>Student journey</h2></div><Target size={22} /></div>
           <div className="admin-funnel">
-            <FunnelStep icon={<Activity size={18} />} label="Page views" value={totals.page_views} percent={100} />
-            <FunnelStep icon={<Search size={18} />} label="Searches" value={totals.searches} percent={executive.searchConversion} />
-            <FunnelStep icon={<MousePointerClick size={18} />} label="Outbound clicks" value={totals.clinic_clicks + totals.opportunity_clicks} percent={executive.engagement} />
+            <FunnelStep icon={<Activity size={18} />} label="Visitors" value={historicalTotals.visitors} percent={100} />
+            <FunnelStep icon={<Search size={18} />} label="Search events" value={historicalTotals.search_events} percent={historicalTotals.visitors ? Math.round((historicalTotals.search_events / historicalTotals.visitors) * 100) : 0} />
+            <FunnelStep icon={<Users size={18} />} label="Student profiles" value={historicalTotals.student_profiles} percent={historicalTotals.visitors ? Math.round((historicalTotals.student_profiles / historicalTotals.visitors) * 100) : 0} />
+            <FunnelStep icon={<Bookmark size={18} />} label="Saved items" value={totalSaved} percent={historicalTotals.student_profiles ? Math.round((totalSaved / historicalTotals.student_profiles) * 100) : 0} />
           </div>
         </section>
 
         <section className="admin-panel">
           <div className="admin-panel-heading"><div><span>Predictive outlook</span><h2>Next 7 days</h2></div><Sparkles size={22} /></div>
-          <div className="admin-forecast"><strong>{forecast.direction}</strong><span>{number(forecast.projected)} projected page views</span><small>{forecast.confidence} confidence · directional estimate from recent aggregate activity</small></div>
+          <div className="admin-forecast"><strong>{forecast.direction}</strong><span>{number(forecast.projected)} projected page views</span><small>{forecast.confidence} confidence · based on recent aggregate activity</small></div>
         </section>
 
         <section className="admin-panel">
           <div className="admin-panel-heading"><div><span>Geographic analytics</span><h2>Demand signals</h2></div><MapPin size={22} /></div>
-          {geographicSignals.length ? <div className="admin-signal-list">{geographicSignals.map(row => <div key={row.search_term}><span>{row.search_term}</span><b>{number(row.search_count)}</b></div>)}</div> : <p className="admin-empty">Location-based searches will appear here as students search by city or county.</p>}
+          {geographicSignals.length ? <div className="admin-signal-list">{geographicSignals.map(row => <div key={row.search_term}><span>{row.search_term}</span><b>{number(row.search_count)}</b></div>)}</div> : <p className="admin-empty">Location-based recent searches will appear here.</p>}
         </section>
       </section>
 
       <section className="admin-grid">
         <RankingTable title="Top pages" rows={pages.slice(0, 10)} labelKey="page_path" valueKey="view_count" emptyText="No page activity yet." />
-        <RankingTable title="Top student searches" rows={searches.slice(0, 10)} labelKey="search_term" valueKey="search_count" emptyText="No searches recorded yet." />
+        <RankingTable title="Top recent searches" rows={searches.slice(0, 10)} labelKey="search_term" valueKey="search_count" emptyText="No recent searches recorded yet." />
         <RankingTable title="Most-clicked clinics" rows={clinics.slice(0, 10)} labelKey="clinic_id" valueKey="click_count" emptyText="No clinic clicks recorded yet." />
         <RankingTable title="Most-clicked opportunities" rows={opportunities.slice(0, 10)} labelKey="opportunity_id" valueKey="click_count" emptyText="No opportunity clicks recorded yet." />
       </section>
