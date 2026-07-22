@@ -6,9 +6,7 @@ import {
   GraduationCap, Hospital, Compass, SlidersHorizontal, LocateFixed,
   Sparkles, ShieldCheck, ArrowRight
 } from 'lucide-react';
-import { MapContainer, TileLayer, Marker, Tooltip, useMap } from 'react-leaflet';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import MapLibreOpportunityMap from './OpportunityMapMapLibre';
 import { supabase } from './lib/supabase';
 import { trackPageView, trackClinicClick, trackOpportunityClick, trackSearch } from './lib/tracking';
 import './styles.css';
@@ -28,12 +26,6 @@ const RURAL_COUNTIES = new Set([
   'Appling','Atkinson','Bacon','Baker','Ben Hill','Berrien','Bleckley','Brantley','Brooks','Bryan','Bulloch','Burke','Calhoun','Camden','Candler','Charlton','Chattooga','Clay','Clinch','Coffee','Colquitt','Cook','Crisp','Dade','Decatur','Dodge','Dooly','Early','Echols','Effingham','Elbert','Emanuel','Evans','Fannin','Franklin','Gilmer','Glascock','Grady','Greene','Habersham','Hancock','Haralson','Hart','Heard','Irwin','Jeff Davis','Jefferson','Jenkins','Johnson','Lanier','Laurens','Liberty','Lincoln','Long','Lumpkin','Macon','Marion','McDuffie','McIntosh','Miller','Mitchell','Montgomery','Morgan','Murray','Pierce','Polk','Pulaski','Putnam','Quitman','Rabun','Randolph','Schley','Screven','Seminole','Stephens','Stewart','Sumter','Talbot','Taliaferro','Tattnall','Taylor','Telfair','Terrell','Thomas','Tift','Toombs','Towns','Treutlen','Turner','Union','Ware','Warren','Washington','Wayne','Webster','Wheeler','White','Wilcox','Wilkes','Worth'
 ]);
 
-const icons = {
-  clinic: L.divIcon({ className: 'pin-shell', html: '<div class="map-pin clinical-pin">+</div>', iconSize: [34, 42], iconAnchor: [17, 42] }),
-  rural: L.divIcon({ className: 'pin-shell', html: '<div class="map-pin rural-pin">✦</div>', iconSize: [34, 42], iconAnchor: [17, 42] }),
-  shadowing: L.divIcon({ className: 'pin-shell', html: '<div class="map-pin shadow-pin">S</div>', iconSize: [34, 42], iconAnchor: [17, 42] }),
-  research: L.divIcon({ className: 'pin-shell', html: '<div class="map-pin research-pin">R</div>', iconSize: [34, 42], iconAnchor: [17, 42] })
-};
 
 function validCoordinates(item) {
   const lat = Number(item.latitude);
@@ -51,61 +43,6 @@ function categoryOf(item) {
   return isRural(item) ? 'rural' : 'clinic';
 }
 function initials(name='Openvol') { return name.split(/\s+/).filter(Boolean).slice(0,3).map(x=>x[0]).join('').toUpperCase(); }
-
-function MapFit({ items }) {
-  const map = useMap();
-  useEffect(() => {
-    const points = items.filter(validCoordinates).map(i => [Number(i.latitude), Number(i.longitude)]);
-    const timer = setTimeout(() => {
-      map.invalidateSize();
-      if (points.length > 1) map.fitBounds(points, { padding: [56, 56], maxZoom: 10 });
-      else if (points.length === 1) map.setView(points[0], 10);
-      else map.setView(GEORGIA_CENTER, 7);
-    }, 120);
-    return () => clearTimeout(timer);
-  }, [items, map]);
-  return null;
-}
-
-function LocateControl() {
-  const map = useMap();
-  function locate() {
-    map.locate({ setView: true, maxZoom: 11 });
-  }
-  return <button className="map-locate-control" onClick={locate} aria-label="Use my location"><LocateFixed size={18}/><span>Near me</span></button>;
-}
-
-function OpportunityMap({ items, activeId, onSelect, ruralMode=false, premium=false }) {
-  const mapped = items.filter(validCoordinates);
-  return (
-    <div className={`map-wrap ${ruralMode ? 'rural-map' : ''} ${premium ? 'premium-map' : ''}`}>
-      <MapContainer center={GEORGIA_CENTER} zoom={7} className="main-map" scrollWheelZoom zoomControl={!premium}>
-        <TileLayer
-          attribution='&copy; OpenStreetMap contributors &copy; CARTO'
-          url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-          subdomains="abcd"
-          maxZoom={20}
-        />
-        <MapFit items={mapped} />
-        {premium && <LocateControl />}
-        {mapped.map(item => {
-          const cat = ruralMode ? 'rural' : categoryOf(item);
-          const key = `${item.kind}-${item.id}`;
-          return <Marker key={key} position={[Number(item.latitude), Number(item.longitude)]} icon={icons[cat]} eventHandlers={{ click: () => onSelect?.(item) }} opacity={activeId && activeId !== key ? .45 : 1}>
-            <Tooltip direction="top" offset={[0,-34]}><b>{item.title}</b><br/><span>{item.city}{item.county ? `, ${item.county} County` : ''}</span></Tooltip>
-          </Marker>;
-        })}
-      </MapContainer>
-      <div className="map-legend">
-        <span><i className="legend-dot clinical-dot"/>Clinical</span>
-        <span><i className="legend-dot rural-dot"/>Rural Health</span>
-        <span><i className="legend-dot shadow-dot"/>Shadowing</span>
-        <span><i className="legend-dot research-dot"/>Research</span>
-      </div>
-      {premium && <div className="map-result-count"><b>{mapped.length}</b><span>mapped opportunities</span></div>}
-    </div>
-  );
-}
 
 async function getStudent(email) {
   const clean = email.trim().toLowerCase();
@@ -169,7 +106,7 @@ function Home({ data, navigate }) {
             ['all','All opportunities'],['clinic','Clinical'],['rural','Rural Health'],['shadowing','Shadowing'],['research','Research']
           ].map(([key,label])=><button key={key} className={category===key?'active':''} onClick={()=>setCategory(key)}>{label}</button>)}
         </div>
-        <OpportunityMap items={filtered.slice(0,120)} onSelect={setSelected} premium />
+        <MapLibreOpportunityMap items={filtered.slice(0,120)} onSelect={setSelected} premium />
         {featured && <div className="featured-map-card">
           <div className={`listing-logo ${categoryOf(featured)}`}>{initials(featured.organization)}</div>
           <div><span>{categoryOf(featured)==='clinic'?'Clinical':categoryOf(featured)==='rural'?'Rural Health':categoryOf(featured)}</span><b>{featured.title}</b><small><MapPin size={13}/>{featured.city || 'Georgia'}{featured.county ? `, ${featured.county} County` : ''}</small></div>
@@ -238,7 +175,7 @@ function DirectoryPage({ data, mode, studentEmail, setStudentEmail }) {
       <div className="results-pane"><div className="results-toolbar"><div><b>{items.length} opportunities</b><span>Updated from the Openvol directory</span></div><label className="email-inline">Save with <input type="email" value={studentEmail} onChange={e=>setStudentEmail(e.target.value)} placeholder="your email"/></label></div>
         <div className="listing-stack">{items.map(item=><ListingCard key={`${item.kind}-${item.id}`} item={item} studentEmail={studentEmail} onHover={setActiveId}/>)}</div>
       </div>
-      <div className="sticky-map"><OpportunityMap items={items} activeId={activeId} onSelect={setSelected} ruralMode={mode==='rural'}/>{selected&&<div className="map-selection"><span>{categoryOf(selected)==='rural'?'Rural Health':'Opportunity'}</span><b>{selected.title}</b><small>{selected.city}{selected.county?`, ${selected.county} County`:''}</small></div>}</div>
+      <div className="sticky-map"><MapLibreOpportunityMap items={items} activeId={activeId} onSelect={setSelected} ruralMode={mode==='rural'}/>{selected&&<div className="map-selection"><span>{categoryOf(selected)==='rural'?'Rural Health':'Opportunity'}</span><b>{selected.title}</b><small>{selected.city}{selected.county?`, ${selected.county} County`:''}</small></div>}</div>
     </section>
   </main>;
 }
