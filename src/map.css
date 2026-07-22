@@ -51,11 +51,11 @@
   top: 18px;
   left: 18px;
   display: flex;
-  gap: 7px;
-  padding: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.88);
-  border-radius: 15px;
-  background: rgba(255, 255, 255, 0.94);
+  gap: 4px;
+  padding: 5px;
+  border: 1px solid rgba(210, 223, 234, 0.92);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.95);
   box-shadow: 0 10px 28px rgba(15, 35, 55, 0.15);
   backdrop-filter: blur(16px);
 }
@@ -66,9 +66,9 @@
   justify-content: center;
   gap: 6px;
   min-height: 38px;
-  padding: 0 11px;
+  padding: 0 12px;
   border: 0;
-  border-radius: 10px;
+  border-radius: 9px;
   background: transparent;
   color: #51697e;
   font-size: 0.72rem;
@@ -107,6 +107,7 @@
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.97);
   color: #0b1f33;
+  font-size: 0.75rem;
   font-weight: 800;
   box-shadow: 0 12px 34px rgba(15, 35, 55, 0.18);
   backdrop-filter: blur(16px);
@@ -130,21 +131,26 @@
   z-index: 13;
   top: 72px;
   right: 18px;
-  display: grid;
-  gap: 7px;
+  display: flex;
+  gap: 6px;
+  padding: 5px;
+  border: 1px solid rgba(210, 223, 234, 0.92);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 10px 28px rgba(15, 35, 55, 0.15);
+  backdrop-filter: blur(16px);
 }
 
 .premium-quick-controls button {
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
-  border: 1px solid rgba(210, 223, 234, 0.96);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.96);
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
   color: #0b1f33;
-  box-shadow: 0 8px 22px rgba(15, 35, 55, 0.14);
-  backdrop-filter: blur(12px);
+  transition: 0.18s ease;
 }
 
 .premium-quick-controls button:hover {
@@ -168,19 +174,25 @@
   bottom: 18px;
 }
 
-/* The home discovery filters float over the top of the premium map.
-   Keep map-specific controls below that filter row so Counties, Regions,
-   and 3D remain fully visible and clickable. */
+/* Build 67.1: the discovery filters remain the primary top row.
+   Map tools now form a clean second row beneath them. */
 .premium-map .premium-map-toolbar {
   top: 76px;
+  left: 18px;
 }
 
 .premium-map .search-this-area {
-  top: 76px;
+  top: 78px;
+  left: 292px;
+  min-height: 38px;
+  transform: none;
+  border-radius: 11px;
+  box-shadow: 0 10px 28px rgba(15, 35, 55, 0.15);
 }
 
 .premium-map .premium-quick-controls {
-  top: 130px;
+  top: 76px;
+  right: 18px;
 }
 
 .openvol-map-popup .maplibregl-popup-content {
@@ -232,14 +244,31 @@
   height: 100vh !important;
 }
 
-/* Fullscreen has no discovery-filter overlap, so return controls to the top. */
-.maplibre-wrap:fullscreen .premium-map-toolbar,
-.maplibre-wrap:fullscreen .search-this-area {
+.maplibre-wrap:fullscreen .premium-map-toolbar {
   top: 18px;
+  left: 18px;
+}
+
+.maplibre-wrap:fullscreen .search-this-area {
+  top: 20px;
+  left: 292px;
+  transform: none;
 }
 
 .maplibre-wrap:fullscreen .premium-quick-controls {
-  top: 72px;
+  top: 18px;
+  right: 18px;
+}
+
+@media (max-width: 900px) {
+  .premium-map .search-this-area {
+    left: 18px;
+    top: 126px;
+  }
+
+  .premium-map .premium-quick-controls {
+    top: 76px;
+  }
 }
 
 @media (max-width: 760px) {
@@ -250,7 +279,7 @@
   }
 
   .premium-map-toolbar button {
-    padding: 0 9px;
+    padding: 0 10px;
   }
 
   .premium-map-toolbar button span:not(.three-d-icon) {
@@ -268,14 +297,18 @@
 
   .premium-map .premium-map-toolbar {
     top: 70px;
-  }
-
-  .premium-map .search-this-area {
-    top: 119px;
+    left: 10px;
   }
 
   .premium-map .premium-quick-controls {
-    top: 171px;
+    top: 70px;
+    right: 10px;
+  }
+
+  .premium-map .search-this-area {
+    top: 120px;
+    left: 10px;
+    min-height: 40px;
   }
 
   .maplibre-wrap .map-result-count {
@@ -285,18 +318,31 @@
 
   .maplibre-wrap:fullscreen .premium-map-toolbar {
     top: 10px;
-  }
-
-  .maplibre-wrap:fullscreen .search-this-area {
-    top: 61px;
+    left: 10px;
   }
 
   .maplibre-wrap:fullscreen .premium-quick-controls {
-    top: 112px;
+    top: 10px;
+    right: 10px;
+  }
+
+  .maplibre-wrap:fullscreen .search-this-area {
+    top: 60px;
+    left: 10px;
   }
 }
 
 @media (max-width: 520px) {
+  .premium-map-toolbar button {
+    width: 38px;
+    padding: 0;
+  }
+
+  .premium-quick-controls button {
+    width: 36px;
+    height: 36px;
+  }
+
   .maplibre-wrap .map-legend {
     right: 10px;
     bottom: 10px;
