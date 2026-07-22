@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
+import AdminDashboard from './AdminDashboard';
+import AdminSettings from './AdminSettings';
 import {
   Search,
   MapPin,
