@@ -16,6 +16,7 @@
     "chart.js": "latest",
     "leaflet": "^1.9.4",
     "lucide-react": "latest",
+    "maplibre-gl": "^5.6.2",
     "react": "latest",
     "react-chartjs-2": "latest",
     "react-dom": "latest",
