@@ -3,7 +3,8 @@ import { createRoot } from 'react-dom/client';
 import {
   Search, MapPin, Bookmark, ExternalLink, Menu, X, HeartPulse,
   Stethoscope, Microscope, Sprout, Route, Clock3, ChevronRight,
-  GraduationCap, Hospital, Compass, SlidersHorizontal
+  GraduationCap, Hospital, Compass, SlidersHorizontal, LocateFixed,
+  Sparkles, ShieldCheck, ArrowRight
 } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Tooltip, useMap } from 'react-leaflet';
 import L from 'leaflet';
@@ -35,7 +36,9 @@ const icons = {
 };
 
 function validCoordinates(item) {
-  return Number.isFinite(Number(item.latitude)) && Number.isFinite(Number(item.longitude));
+  const lat = Number(item.latitude);
+  const lng = Number(item.longitude);
+  return Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180 && !(lat === 0 && lng === 0);
 }
 function isRural(item) {
   const text = `${item.county || ''} ${item.city || ''} ${item.notes || ''} ${item.volunteer_type || ''} ${item.opportunity_category || ''}`.toLowerCase();
@@ -53,23 +56,42 @@ function MapFit({ items }) {
   const map = useMap();
   useEffect(() => {
     const points = items.filter(validCoordinates).map(i => [Number(i.latitude), Number(i.longitude)]);
-    if (points.length > 1) map.fitBounds(points, { padding: [42, 42], maxZoom: 11 });
-    else if (points.length === 1) map.setView(points[0], 11);
-    else map.setView(GEORGIA_CENTER, 7);
+    const timer = setTimeout(() => {
+      map.invalidateSize();
+      if (points.length > 1) map.fitBounds(points, { padding: [56, 56], maxZoom: 10 });
+      else if (points.length === 1) map.setView(points[0], 10);
+      else map.setView(GEORGIA_CENTER, 7);
+    }, 120);
+    return () => clearTimeout(timer);
   }, [items, map]);
   return null;
 }
 
-function OpportunityMap({ items, activeId, onSelect, ruralMode=false }) {
+function LocateControl() {
+  const map = useMap();
+  function locate() {
+    map.locate({ setView: true, maxZoom: 11 });
+  }
+  return <button className="map-locate-control" onClick={locate} aria-label="Use my location"><LocateFixed size={18}/><span>Near me</span></button>;
+}
+
+function OpportunityMap({ items, activeId, onSelect, ruralMode=false, premium=false }) {
   const mapped = items.filter(validCoordinates);
   return (
-    <div className={`map-wrap ${ruralMode ? 'rural-map' : ''}`}>
-      <MapContainer center={GEORGIA_CENTER} zoom={7} className="main-map" scrollWheelZoom>
-        <TileLayer attribution='&copy; OpenStreetMap contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+    <div className={`map-wrap ${ruralMode ? 'rural-map' : ''} ${premium ? 'premium-map' : ''}`}>
+      <MapContainer center={GEORGIA_CENTER} zoom={7} className="main-map" scrollWheelZoom zoomControl={!premium}>
+        <TileLayer
+          attribution='&copy; OpenStreetMap contributors &copy; CARTO'
+          url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+          subdomains="abcd"
+          maxZoom={20}
+        />
         <MapFit items={mapped} />
+        {premium && <LocateControl />}
         {mapped.map(item => {
           const cat = ruralMode ? 'rural' : categoryOf(item);
-          return <Marker key={`${item.kind}-${item.id}`} position={[Number(item.latitude), Number(item.longitude)]} icon={icons[cat]} eventHandlers={{ click: () => onSelect?.(item) }} opacity={activeId && activeId !== `${item.kind}-${item.id}` ? .55 : 1}>
+          const key = `${item.kind}-${item.id}`;
+          return <Marker key={key} position={[Number(item.latitude), Number(item.longitude)]} icon={icons[cat]} eventHandlers={{ click: () => onSelect?.(item) }} opacity={activeId && activeId !== key ? .45 : 1}>
             <Tooltip direction="top" offset={[0,-34]}><b>{item.title}</b><br/><span>{item.city}{item.county ? `, ${item.county} County` : ''}</span></Tooltip>
           </Marker>;
         })}
@@ -80,6 +102,7 @@ function OpportunityMap({ items, activeId, onSelect, ruralMode=false }) {
         <span><i className="legend-dot shadow-dot"/>Shadowing</span>
         <span><i className="legend-dot research-dot"/>Research</span>
       </div>
+      {premium && <div className="map-result-count"><b>{mapped.length}</b><span>mapped opportunities</span></div>}
     </div>
   );
 }
@@ -109,25 +132,53 @@ function AppHeader({ route, navigate }) {
 function SearchBar({ value, onChange, placeholder='Search clinics, hospitals, programs, or cities' }) {
   return <div className="search-shell"><Search size={20}/><input value={value} onChange={e=>onChange(e.target.value)} placeholder={placeholder}/><button aria-label="Filters"><SlidersHorizontal size={18}/><span>Filters</span></button></div>;
 }
-
 function Stat({ value, label, icon }) { return <div className="stat-card"><div className="stat-icon">{icon}</div><div><b>{value}</b><span>{label}</span></div></div>; }
 
 function Home({ data, navigate }) {
-  const all = [...data.clinics, ...data.opportunities];
+  const all = useMemo(() => [...data.clinics, ...data.opportunities], [data]);
+  const [query, setQuery] = useState('');
+  const [category, setCategory] = useState('all');
+  const [selected, setSelected] = useState(null);
+  const filtered = useMemo(() => all.filter(item => {
+    const matchesCategory = category === 'all' || categoryOf(item) === category;
+    const haystack = `${item.title} ${item.organization} ${item.city} ${item.county} ${item.notes}`.toLowerCase();
+    return matchesCategory && haystack.includes(query.toLowerCase());
+  }), [all, query, category]);
   const rural = all.filter(isRural);
-  return <main>
-    <section className="hero-section">
-      <div className="hero-copy">
-        <span className="eyebrow">Built for future healthcare professionals</span>
-        <h1>Your Journey into Healthcare Starts Here.</h1>
-        <p>Discover meaningful clinical, rural health, shadowing, and research experiences across Georgia—all in one student-friendly platform.</p>
-        <div className="hero-actions"><button className="primary-btn" onClick={()=>navigate('clinical')}>Explore opportunities <ChevronRight size={18}/></button><button className="ghost-btn" onClick={()=>navigate('rural')}>Explore Rural Health</button></div>
-        <div className="trust-row"><span>✓ No cost</span><span>✓ Student focused</span><span>✓ Georgia-wide</span></div>
+  const featured = selected || filtered.find(validCoordinates) || filtered[0];
+  function explore() {
+    const route = category === 'all' || category === 'clinic' ? 'clinical' : category;
+    navigate(route);
+  }
+  return <main className="phase-two-home">
+    <section className="phase-two-hero">
+      <div className="hero-intro">
+        <span className="eyebrow"><Sparkles size={15}/> Built for future healthcare professionals</span>
+        <h1>Find the experience that moves your healthcare journey forward.</h1>
+        <p>Explore verified clinical, rural health, shadowing, and research opportunities across Georgia—all in one beautifully simple platform.</p>
+        <div className="hero-proof"><span><ShieldCheck size={17}/> Free for students</span><span><MapPin size={17}/> Georgia-wide</span><span><HeartPulse size={17}/> Healthcare focused</span></div>
       </div>
-      <OpportunityMap items={all.slice(0,80)} />
+
+      <div className="discovery-shell">
+        <div className="floating-discovery-bar">
+          <div className="discovery-field"><Search size={20}/><div><small>What are you looking for?</small><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Hospital, clinic, city, specialty..."/></div></div>
+          <button className="discovery-submit" onClick={explore}>Search <ArrowRight size={17}/></button>
+        </div>
+        <div className="category-chip-row">
+          {[
+            ['all','All opportunities'],['clinic','Clinical'],['rural','Rural Health'],['shadowing','Shadowing'],['research','Research']
+          ].map(([key,label])=><button key={key} className={category===key?'active':''} onClick={()=>setCategory(key)}>{label}</button>)}
+        </div>
+        <OpportunityMap items={filtered.slice(0,120)} onSelect={setSelected} premium />
+        {featured && <div className="featured-map-card">
+          <div className={`listing-logo ${categoryOf(featured)}`}>{initials(featured.organization)}</div>
+          <div><span>{categoryOf(featured)==='clinic'?'Clinical':categoryOf(featured)==='rural'?'Rural Health':categoryOf(featured)}</span><b>{featured.title}</b><small><MapPin size={13}/>{featured.city || 'Georgia'}{featured.county ? `, ${featured.county} County` : ''}</small></div>
+          <button onClick={explore}><ChevronRight size={18}/></button>
+        </div>}
+      </div>
     </section>
 
-    <section className="stats-grid">
+    <section className="stats-grid phase-two-stats">
       <Stat value={data.clinics.length} label="Clinical organizations" icon={<Hospital/>}/>
       <Stat value={rural.length} label="Rural health listings" icon={<Sprout/>}/>
       <Stat value={data.opportunities.filter(x=>categoryOf(x)==='shadowing').length} label="Shadowing programs" icon={<Stethoscope/>}/>
@@ -177,7 +228,7 @@ function DirectoryPage({ data, mode, studentEmail, setStudentEmail }) {
   const [query,setQuery]=useState(''); const [activeId,setActiveId]=useState(null); const [selected,setSelected]=useState(null);
   const base = mode==='clinical' ? data.clinics : mode==='rural' ? [...data.clinics,...data.opportunities].filter(isRural) : data.opportunities.filter(x=>categoryOf(x)===mode);
   const items = base.filter(x=>`${x.title} ${x.organization} ${x.city} ${x.county} ${x.notes}`.toLowerCase().includes(query.toLowerCase()));
-  useEffect(()=>{ if(query.trim()) trackSearch(query, mode); },[query,mode]);
+  useEffect(()=>{ if(query.trim()) trackSearch({searchText:query, category:mode}); },[query,mode]);
   const title = mode==='clinical'?'Clinical Volunteering':mode==='rural'?'Rural Health':mode==='shadowing'?'Shadowing':'Research';
   const subtitle = mode==='rural'?'Explore meaningful service opportunities in Georgia communities where healthcare access matters most.':'Find verified healthcare experiences across Georgia.';
   return <main className="directory-page">
@@ -199,14 +250,25 @@ function JourneyPage({ studentEmail, setStudentEmail, savedOnly=false }) {
 function App() {
   const path = location.pathname.split('/')[1];
   const [route,setRoute]=useState(ROUTES.some(([k])=>k===path)?path:'home');
-  const [data,setData]=useState({clinics:[],opportunities:[],loading:true});
+  const [data,setData]=useState({clinics:[],opportunities:[],loading:true,error:''});
   const [studentEmail,setStudentEmail]=useState(localStorage.getItem('openvol_student_email')||'');
   function navigate(next){ setRoute(next); history.pushState(null,'',next==='home'?'/':`/${next}`); window.scrollTo({top:0,behavior:'smooth'}); }
   useEffect(()=>{ localStorage.setItem('openvol_student_email',studentEmail); },[studentEmail]);
   useEffect(()=>{ const pop=()=>setRoute(location.pathname.split('/')[1]||'home'); addEventListener('popstate',pop); return()=>removeEventListener('popstate',pop); },[]);
-  useEffect(()=>{ trackPageView(route); },[route]);
-  useEffect(()=>{ (async()=>{ const [{data:clinics},{data:opportunities}] = await Promise.all([supabase.from('clinics').select('*').order('clinic_name'),supabase.from('opportunities').select('*').order('opportunity_name')]);
-    setData({loading:false,clinics:(clinics||[]).map(x=>({...x,kind:'clinic',title:x.clinic_name,organization:x.clinic_name,url:x.volunteer_url||x.website_url})),opportunities:(opportunities||[]).map(x=>({...x,kind:'opportunity',title:x.opportunity_name,organization:x.organization_name,url:x.application_url||x.opportunity_url||x.website_url}))}); })(); },[]);
+  useEffect(()=>{ trackPageView(route).catch(()=>{}); },[route]);
+  useEffect(()=>{ (async()=>{
+    const [clinicResult, opportunityResult] = await Promise.all([
+      supabase.from('clinics').select('*').order('clinic_name'),
+      supabase.from('opportunities').select('*').order('opportunity_name')
+    ]);
+    const error = clinicResult.error || opportunityResult.error;
+    setData({
+      loading:false,
+      error:error?.message || '',
+      clinics:(clinicResult.data||[]).map(x=>({...x,kind:'clinic',title:x.clinic_name,organization:x.clinic_name,url:x.volunteer_url||x.website_url})),
+      opportunities:(opportunityResult.data||[]).map(x=>({...x,kind:'opportunity',title:x.opportunity_name,organization:x.organization_name,url:x.application_url||x.opportunity_url||x.website_url}))
+    });
+  })(); },[]);
   return <><AppHeader route={route} navigate={navigate}/>{data.loading?<div className="loading-screen"><div className="loader"/><p>Loading Openvol opportunities…</p></div>:route==='home'?<Home data={data} navigate={navigate}/>:['clinical','rural','shadowing','research'].includes(route)?<DirectoryPage data={data} mode={route} studentEmail={studentEmail} setStudentEmail={setStudentEmail}/>:route==='saved'?<JourneyPage savedOnly studentEmail={studentEmail} setStudentEmail={setStudentEmail}/>:<JourneyPage studentEmail={studentEmail} setStudentEmail={setStudentEmail}/>}<footer><div><img src="/openvol-logo.png" alt="Openvol"/><p>Your Journey into Healthcare Starts Here.</p></div><div><b>Explore</b><button onClick={()=>navigate('clinical')}>Clinical Volunteering</button><button onClick={()=>navigate('rural')}>Rural Health</button><button onClick={()=>navigate('shadowing')}>Shadowing</button><button onClick={()=>navigate('research')}>Research</button></div><div><b>Openvol</b><span>Created by Rithvik Lal</span><span>A student-led initiative</span><span>© {new Date().getFullYear()} Openvol</span></div></footer></>;
 }
 
