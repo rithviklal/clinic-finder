@@ -168,6 +168,21 @@
   bottom: 18px;
 }
 
+/* The home discovery filters float over the top of the premium map.
+   Keep map-specific controls below that filter row so Counties, Regions,
+   and 3D remain fully visible and clickable. */
+.premium-map .premium-map-toolbar {
+  top: 76px;
+}
+
+.premium-map .search-this-area {
+  top: 76px;
+}
+
+.premium-map .premium-quick-controls {
+  top: 130px;
+}
+
 .openvol-map-popup .maplibregl-popup-content {
   min-width: 220px;
   padding: 0;
@@ -217,6 +232,16 @@
   height: 100vh !important;
 }
 
+/* Fullscreen has no discovery-filter overlap, so return controls to the top. */
+.maplibre-wrap:fullscreen .premium-map-toolbar,
+.maplibre-wrap:fullscreen .search-this-area {
+  top: 18px;
+}
+
+.maplibre-wrap:fullscreen .premium-quick-controls {
+  top: 72px;
+}
+
 @media (max-width: 760px) {
   .premium-map-toolbar {
     top: 10px;
@@ -241,9 +266,33 @@
     right: 10px;
   }
 
+  .premium-map .premium-map-toolbar {
+    top: 70px;
+  }
+
+  .premium-map .search-this-area {
+    top: 119px;
+  }
+
+  .premium-map .premium-quick-controls {
+    top: 171px;
+  }
+
   .maplibre-wrap .map-result-count {
     right: 10px;
     bottom: 115px;
+  }
+
+  .maplibre-wrap:fullscreen .premium-map-toolbar {
+    top: 10px;
+  }
+
+  .maplibre-wrap:fullscreen .search-this-area {
+    top: 61px;
+  }
+
+  .maplibre-wrap:fullscreen .premium-quick-controls {
+    top: 112px;
   }
 }
 
