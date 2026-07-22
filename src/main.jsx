@@ -386,8 +386,15 @@ function JourneyPage({ studentEmail, setStudentEmail, savedOnly = false }) {
 }
 
 function App() {
-  const path = location.pathname.split('/')[1];
-  const [route, setRoute] = useState(ROUTES.some(([key]) => key === path) ? path : 'home');
+const path = location.pathname.split('/')[1];
+const validRoutes = [
+  ...ROUTES.map(([key]) => key),
+  'admin',
+  'admin-settings'
+];
+const [route, setRoute] = useState(
+  validRoutes.includes(path) ? path : 'home'
+);
   const [data, setData] = useState({ clinics: [], opportunities: [], loading: true, error: '' });
   const [studentEmail, setStudentEmail] = useState(localStorage.getItem('openvol_student_email') || '');
 
