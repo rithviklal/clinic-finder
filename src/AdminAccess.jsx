@@ -16,6 +16,7 @@ async function getAdminAccess(user) {
 
 export default function AdminAccess({ children, onExit }) {
   const [session, setSession] = useState(null);
+  const [authorized, setAuthorized] = useState(false);
   const [checking, setChecking] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
