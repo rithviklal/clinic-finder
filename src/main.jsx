@@ -13,6 +13,7 @@ import { supabase } from './lib/supabase';
 import { trackPageView, trackClinicClick, trackOpportunityClick, trackSearch } from './lib/tracking';
 import AdminDashboard from './AdminDashboard';
 import AdminSettings from './AdminSettings';
+import AdminAccess from './AdminAccess';
 import './styles.css';
 import './build71.css';
 
@@ -125,6 +126,15 @@ function AppHeader({ route, navigate }) {
               {label}
             </button>
           ))}
+          <button
+            className={route === 'admin' || route === 'admin-settings' ? 'active admin-nav-link' : 'admin-nav-link'}
+            onClick={() => {
+              navigate('admin');
+              setOpen(false);
+            }}
+          >
+            <ShieldCheck size={15} /> Admin
+          </button>
         </nav>
 
         <button
@@ -436,8 +446,8 @@ function App() {
     <AppHeader route={route} navigate={navigate} />
     {data.loading ? <div className="loading-screen"><div className="loader" /><p>Loading Openvol opportunities…</p></div>
       : data.error ? <main className="simple-page"><section className="journey-card"><HeartPulse size={34} /><h2>Openvol could not load the directory</h2><p>{data.error}</p><button className="primary-btn" onClick={() => location.reload()}>Try again</button></section></main>
-      : route === 'admin' ? <AdminDashboard onOpenSettings={() => navigate('admin-settings')} />
-      : route === 'admin-settings' ? <AdminSettings onBack={() => navigate('admin')} />
+      : route === 'admin' ? <AdminAccess onExit={() => navigate('home')}><AdminDashboard onOpenSettings={() => navigate('admin-settings')} /></AdminAccess>
+      : route === 'admin-settings' ? <AdminAccess onExit={() => navigate('home')}><AdminSettings onBack={() => navigate('admin')} /></AdminAccess>
       : route === 'home' ? <Home data={data} navigate={navigate} />
       : ['clinical','rural','shadowing','research'].includes(route) ? <DirectoryPage data={data} mode={route} studentEmail={studentEmail} setStudentEmail={setStudentEmail} />
       : route === 'saved' ? <JourneyPage savedOnly studentEmail={studentEmail} setStudentEmail={setStudentEmail} />
@@ -446,7 +456,7 @@ function App() {
     <footer>
       <div><img src="/openvol-logo.png" alt="Openvol" /><p>Your Journey into Healthcare Starts Here.</p></div>
       <div><b>Explore</b><button onClick={() => navigate('clinical')}>Clinical Volunteering</button><button onClick={() => navigate('rural')}>Rural Health</button><button onClick={() => navigate('shadowing')}>Shadowing</button><button onClick={() => navigate('research')}>Research</button></div>
-      <div><b>Openvol</b><span>Created by Rithvik Lal</span><span>A student-led initiative</span><span>Build 72</span><span>© {new Date().getFullYear()} Openvol</span></div>
+      <div><b>Openvol</b><span>Created by Rithvik Lal</span><span>A student-led initiative</span><span>Build 73</span><span>© {new Date().getFullYear()} Openvol</span></div>
     </footer>
   </>;
 }
