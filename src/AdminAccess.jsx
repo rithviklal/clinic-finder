@@ -66,6 +66,34 @@ export default function AdminAccess({ children, onExit }) {
     setStatus({ loading: false, error: '', message: '' });
   }
 
+  async function sendMagicLink() {
+    const cleanEmail = email.trim().toLowerCase();
+    if (!cleanEmail) {
+      setStatus({ loading: false, error: 'Enter your administrator email address first.', message: '' });
+      return;
+    }
+
+    setStatus({ loading: true, error: '', message: '' });
+    const { error } = await supabase.auth.signInWithOtp({
+      email: cleanEmail,
+      options: {
+        emailRedirectTo: `${window.location.origin}/admin`,
+        shouldCreateUser: false
+      }
+    });
+
+    if (error) {
+      setStatus({ loading: false, error: 'Unable to send the sign-in link right now. Please try again.', message: '' });
+      return;
+    }
+
+    setStatus({
+      loading: false,
+      error: '',
+      message: 'If that email belongs to an administrator account, a secure sign-in link has been sent.'
+    });
+  }
+
   async function requestPasswordReset(event) {
     event.preventDefault();
     const cleanEmail = email.trim().toLowerCase();
@@ -175,6 +203,7 @@ export default function AdminAccess({ children, onExit }) {
               {status.error && <div className="admin-access-error">{status.error}</div>}
               {status.message && <div className="admin-access-message">{status.message}</div>}
               <button type="submit" disabled={status.loading}><LogIn size={18} /> {status.loading ? 'Signing in…' : 'Sign in securely'}</button>
+              <button type="button" className="admin-access-secondary" disabled={status.loading} onClick={sendMagicLink}><Mail size={18} /> Email me a secure sign-in link</button>
               <button type="button" className="admin-access-link" onClick={() => { setMode('reset'); setStatus({ loading: false, error: '', message: '' }); }}>Forgot password?</button>
             </form>
           )}
