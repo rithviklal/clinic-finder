@@ -46,6 +46,7 @@ const RURAL_COUNTIES = new Set([
 ]);
 
 function isRural(item) {
+  if (item.rural_health === true) return true;
   const text = `${item.county || ''} ${item.city || ''} ${item.notes || ''} ${item.volunteer_type || ''} ${item.opportunity_category || ''}`.toLowerCase();
   return RURAL_COUNTIES.has(String(item.county || '').replace(/ County$/i, ''))
     || /rural|critical access|mobile clinic|community health center/.test(text);
@@ -250,7 +251,7 @@ function ListingCard({ item, studentEmail, onHover, bestMatch = false }) {
   const cat = categoryOf(item);
   const score = Math.max(0, Math.min(100, Math.round(Number(item.matchScore) || 0)));
   const reasons = Array.isArray(item.matchReasons) ? item.matchReasons : [];
-  const badges = [item.specialty, item.opportunity_type || item.opportunity_category].filter(Boolean);
+  const badges = [item.rural_designation, item.specialty, item.opportunity_type || item.opportunity_category].filter(Boolean);
 
   async function save() {
     const student = await getStudent(studentEmail);
@@ -365,7 +366,7 @@ function DirectoryPage({ data, mode, studentEmail, setStudentEmail }) {
   }, [query, mode]);
 
   const title = mode === 'clinical' ? 'Clinical Volunteering' : mode === 'rural' ? 'Rural Health' : mode === 'shadowing' ? 'Shadowing' : 'Research';
-  const subtitle = mode === 'rural' ? 'Explore meaningful service opportunities in Georgia communities where healthcare access matters most.' : 'Find verified healthcare experiences across Georgia.';
+  const subtitle = mode === 'rural' ? 'Explore Georgia rural hospitals, Critical Access Hospitals, Rural Health Clinics, and verified student service opportunities.' : 'Find verified healthcare experiences across Georgia.';
   const hasRankedSearch = Boolean(query.trim() && items.some(item => item.matchScore > 0));
 
   return (
@@ -376,7 +377,7 @@ function DirectoryPage({ data, mode, studentEmail, setStudentEmail }) {
       </section>
 
       {mode === 'rural' && <section className="rural-summary">
-        <Stat value={items.length} label="Rural opportunities" icon={<Sprout />} />
+        <Stat value={items.length} label="Rural health locations" icon={<Sprout />} />
         <Stat value={new Set(items.map(item => item.county).filter(Boolean)).size} label="Counties represented" icon={<MapPin />} />
         <Stat value={items.filter(item => /clinic|hospital/i.test(`${item.organization} ${item.title}`)).length} label="Clinics & hospitals" icon={<Hospital />} />
         <Stat value="Georgia" label="Statewide focus" icon={<Compass />} />
@@ -385,7 +386,7 @@ function DirectoryPage({ data, mode, studentEmail, setStudentEmail }) {
       <section className="split-layout">
         <div className="results-pane">
           <div className="results-toolbar">
-            <div><b>{items.length} opportunities</b><span>{hasRankedSearch ? 'Ranked by relevance to your search' : 'Updated from the Openvol directory'}</span></div>
+            <div><b>{items.length} {mode === 'rural' ? 'locations & opportunities' : 'opportunities'}</b><span>{hasRankedSearch ? 'Ranked by relevance to your search' : 'Updated from the Openvol directory'}</span></div>
             <label className="email-inline">Save with <input type="email" value={studentEmail} onChange={event => setStudentEmail(event.target.value)} placeholder="your email" /></label>
           </div>
 
