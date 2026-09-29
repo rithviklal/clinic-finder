@@ -14,6 +14,7 @@ import { trackPageView, trackClinicClick, trackOpportunityClick, trackSearch } f
 import AdminDashboard from './AdminDashboard';
 import AdminSettings from './AdminSettings';
 import AdminAccess from './AdminAccess';
+import AdminManagement from './AdminManagement';
 import './styles.css';
 import './build71.css';
 
@@ -26,7 +27,8 @@ const APP_ROUTES = new Set([
   'journey',
   'saved',
   'admin',
-  'admin-settings'
+  'admin-settings',
+  'admin-management'
 ]);
 
 const ROUTES = [
@@ -127,7 +129,7 @@ function AppHeader({ route, navigate }) {
             </button>
           ))}
           <button
-            className={route === 'admin' || route === 'admin-settings' ? 'active admin-nav-link' : 'admin-nav-link'}
+            className={route === 'admin' || route === 'admin-settings' || route === 'admin-management' ? 'active admin-nav-link' : 'admin-nav-link'}
             onClick={() => {
               navigate('admin');
               setOpen(false);
