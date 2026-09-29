@@ -120,7 +120,7 @@ function HistoricalCard({ item }) {
   );
 }
 
-export default function AdminDashboard({ onOpenSettings }) {
+export default function AdminDashboard({ onOpenSettings, onOpenManagement }) {
   const [range, setRange] = useState(30);
   const [daily, setDaily] = useState([]);
   const [pages, setPages] = useState([]);
@@ -257,6 +257,7 @@ export default function AdminDashboard({ onOpenSettings }) {
           <button onClick={load} disabled={status.loading}><RefreshCw size={17} className={status.loading ? 'spin' : ''} /> Refresh</button>
           <button onClick={exportAll}><Download size={17} /> Export CSV</button>
           <button onClick={printReport}><FileText size={17} /> Executive report</button>
+          <button onClick={onOpenManagement}><Users size={17} /> Manage data</button>
           <button className="primary" onClick={onOpenSettings}><Settings size={17} /> Settings</button>
         </div>
       </section>
