@@ -448,7 +448,7 @@ function App() {
     <AppHeader route={route} navigate={navigate} />
     {data.loading ? <div className="loading-screen"><div className="loader" /><p>Loading Openvol opportunities…</p></div>
       : data.error ? <main className="simple-page"><section className="journey-card"><HeartPulse size={34} /><h2>Openvol could not load the directory</h2><p>{data.error}</p><button className="primary-btn" onClick={() => location.reload()}>Try again</button></section></main>
-      : route === 'admin' ? <AdminAccess onExit={() => navigate('home')}><AdminDashboard onOpenSettings={() => navigate('admin-settings')} /></AdminAccess>
+      : route === 'admin' ? <AdminAccess onExit={() => navigate('home')}><AdminDashboard onOpenSettings={() => navigate('admin-settings')} onOpenManagement={() => navigate('admin-management')} /></AdminAccess>
       : route === 'admin-settings' ? <AdminAccess onExit={() => navigate('home')}><AdminSettings onBack={() => navigate('admin')} /></AdminAccess>
       : route === 'home' ? <Home data={data} navigate={navigate} />
       : ['clinical','rural','shadowing','research'].includes(route) ? <DirectoryPage data={data} mode={route} studentEmail={studentEmail} setStudentEmail={setStudentEmail} />
